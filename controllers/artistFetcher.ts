@@ -1,8 +1,8 @@
 import axios from 'axios';
-import * as fs from 'fs';
 import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
 import {createLinks} from "../utils/createLinks";
+import {loadFromCache, saveToCache} from "../utils/cacheOps";
 
 interface Tag {
     name: string;
@@ -31,7 +31,7 @@ interface ArtistResponse {
     artists: ArtistData[];
 }
 
-interface ArtistJSON {
+export interface ArtistJSON {
     count: number;
     artists: Artist[];
     links: ArtistLink[];
@@ -50,57 +50,11 @@ const CACHE_DURATION_DAYS = 60;
 
 const tagMap = new Map<string, string[]>();
 
-const ensureCacheDir = () => {
-    try {
-        if (!fs.existsSync(CACHE_DIR)) {
-            fs.mkdirSync(CACHE_DIR, { recursive: true });
-        }
-    } catch (error) {
-        console.error('Error creating cache directory:', error);
-    }
-};
-
-const isCacheValid = (filePath: string): boolean => {
-    try {
-        if (!fs.existsSync(filePath)) {
-            return false;
-        }
-
-        const stats = fs.statSync(filePath);
-        const ageInDays = (Date.now() - stats.mtime.getTime()) / (1000 * 60 * 60 * 24);
-        return ageInDays < CACHE_DURATION_DAYS;
-    } catch (error) {
-        console.error('Error checking cache validity:', error);
-        return false;
-    }
-};
-
-const loadFromCache = (filePath: string): ArtistJSON | null => {
-    try {
-        if (!isCacheValid(filePath)) {
-            return null;
-        }
-
-        const data = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error loading from cache:', error);
-        return null;
-    }
-};
-
-const saveToCache = (filePath: string, data: ArtistJSON): void => {
-    try {
-        ensureCacheDir();
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error('Error saving to cache:', error);
-    }
-};
-
+const sanitizeGenre = (genreName: string) => {
+    return genreName.replaceAll(' ', '_').replaceAll('&', 'ampersand').replaceAll('"', '');
+}
 
 const fetchArtists = async (limit: number, offset: number, genre: string): Promise<Artist[]> => {
-
     const res = await axios.get<ArtistResponse>(`${BASE_URL}${genre}&limit=${limit}&offset=${offset}`, {
         headers: {
             'User-Agent': USER_AGENT,
@@ -129,11 +83,11 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
 };
 
 export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
-    const cacheFilePath = path.join(CACHE_DIR, `${genre}Artists.json`);
+    const cacheFilePath = path.join(CACHE_DIR, `${sanitizeGenre(genre)}Artists.json`);
 
     // Try to load from cache first
-    const cachedData = loadFromCache(cacheFilePath);
-    if (cachedData) {
+    const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
+    if (cachedData && 'artists' in cachedData) {
         console.log(`Returning cached artists data for genre: ${genre}`);
         return cachedData;
     }
@@ -141,8 +95,9 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
     console.log(`Fetching fresh artists data for genre: ${genre}`);
 
     try {
+        const noAmpGenre = genre.replaceAll('&', '%26')
         tagMap.clear();
-        const firstRes = await axios.get<ArtistResponse>(`${BASE_URL}${genre}&limit=1&offset=0`, {
+        const firstRes = await axios.get<ArtistResponse>(`${BASE_URL}${noAmpGenre}&limit=1&offset=0`, {
             headers: {
                 'User-Agent': USER_AGENT,
                 'Accept': 'application/json',
@@ -153,7 +108,7 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
         const allArtists: Artist[] = [];
 
         for (let offset = 0; offset < total; offset += LIMIT) {
-            const artists = await throttleQueue.enqueue(() => fetchArtists(LIMIT, offset, genre));
+            const artists = await throttleQueue.enqueue(() => fetchArtists(LIMIT, offset, noAmpGenre));
             allArtists.push(...artists);
         }
 
@@ -161,12 +116,12 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
             count: total,
             artists: allArtists,
             links: createLinks(tagMap),
-            date: new Date().toDateString(),
+            date: new Date().toISOString(),
             genre: genre
         };
 
         // Save to cache
-        saveToCache(cacheFilePath, artistStruct);
+        saveToCache(cacheFilePath, artistStruct, CACHE_DIR);
 
         return artistStruct;
     } catch (error) {
