@@ -67,26 +67,34 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
         },
     });
     return res.data.artists.map(artist => {
-        // Creates tag map while iterating through the artists
+        // Creates decade-location map while iterating through the artists
         let tags: Tag[] = [];
         if (artist.tags && artist.tags.length) {
             tags = artist.tags.filter(t => t.count > 0 && !genreIsEqual(t.name, genre));
-            tags.forEach((tag: Tag) => {
-                const tagArtists = tagMap.get(tag.name);
-                if (tagArtists) {
-                    tagMap.set(tag.name, [...tagArtists, artist.id]);
-                } else {
-                    tagMap.set(tag.name, [artist.id]);
-                }
-            })
+        }
+
+        const location = artist.area ? artist.area.name : undefined;
+        const startYear = artist["life-span"] && artist["life-span"].begin ? artist["life-span"].begin.slice(0, 4) : undefined;
+
+        // Group artists by decade and location
+        if (location && startYear && !isNaN(parseInt(startYear))) {
+            const decade = Math.floor(parseInt(startYear) / 10) * 10;
+            const decadeLocationKey = `${decade}s-${location}`;
+
+            const existingArtists = tagMap.get(decadeLocationKey);
+            if (existingArtists) {
+                tagMap.set(decadeLocationKey, [...existingArtists, artist.id]);
+            } else {
+                tagMap.set(decadeLocationKey, [artist.id]);
+            }
         }
 
         return {
             id: artist.id,
             name: artist.name,
             tags: tags,
-            location: artist.area ? artist.area.name : undefined,
-            startDate: artist["life-span"] && artist["life-span"].begin ? artist["life-span"].begin.slice(0, 4) : undefined,
+            location: location,
+            startDate: startYear,
             endDate: artist["life-span"] && artist["life-span"].end ? artist["life-span"].end.slice(0, 4) : undefined,
         }
     });
