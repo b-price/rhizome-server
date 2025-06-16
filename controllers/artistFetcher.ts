@@ -89,6 +89,20 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
             }
         }
 
+        // Creates tag links
+        // let tags: Tag[] = [];
+        // if (artist.tags && artist.tags.length) {
+        //     tags = artist.tags.filter(t => t.count > 0 && !genreIsEqual(t.name, genre));
+        //     tags.forEach((tag: Tag) => {
+        //         const tagArtists = tagMap.get(tag.name);
+        //         if (tagArtists) {
+        //             tagMap.set(tag.name, [...tagArtists, artist.id]);
+        //         } else {
+        //             tagMap.set(tag.name, [artist.id]);
+        //         }
+        //     })
+        // }
+
         return {
             id: artist.id,
             name: artist.name,
