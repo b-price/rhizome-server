@@ -51,7 +51,11 @@ const CACHE_DURATION_DAYS = 60;
 const tagMap = new Map<string, string[]>();
 
 const sanitizeGenre = (genreName: string) => {
-    return genreName.replaceAll(' ', '_').replaceAll('&', 'ampersand').replaceAll('"', '');
+    return genreName.replaceAll(' ', '_').replaceAll('&', 'ampersand').replaceAll('"', '').toLowerCase();
+}
+
+const genreIsEqual = (genre1: string, genre2: string) => {
+    return genre1.toLowerCase().replaceAll('"', '') === genre2.toLowerCase().replaceAll('"', '');
 }
 
 const fetchArtists = async (limit: number, offset: number, genre: string): Promise<Artist[]> => {
@@ -63,15 +67,19 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
     });
     return res.data.artists.map(artist => {
         // Creates tag map while iterating through the artists
-        const tags = artist.tags.filter(t => t.count > 0 && t.name !== genre);
-        tags.forEach((tag: Tag) => {
-            const tagArtists = tagMap.get(tag.name);
-            if (tagArtists) {
-                tagMap.set(tag.name, [...tagArtists, artist.name]);
-            } else {
-                tagMap.set(tag.name, [artist.name]);
-            }
-        })
+        let tags: Tag[] = [];
+        if (artist.tags && artist.tags.length) {
+            tags = artist.tags.filter(t => t.count > 0 && !genreIsEqual(t.name, genre));
+            tags.forEach((tag: Tag) => {
+                const tagArtists = tagMap.get(tag.name);
+                if (tagArtists) {
+                    tagMap.set(tag.name, [...tagArtists, artist.id]);
+                } else {
+                    tagMap.set(tag.name, [artist.id]);
+                }
+            })
+        }
+
         return {
             id: artist.id,
             name: artist.name,
@@ -92,7 +100,7 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
         return cachedData;
     }
 
-    console.log(`Fetching fresh artists data for genre: ${genre}`);
+    console.log(`Fetching fresh artists data for genre: ${genre} ...`);
 
     try {
         const noAmpGenre = genre.replaceAll('&', '%26')
@@ -103,6 +111,10 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
                 'Accept': 'application/json',
             },
         });
+
+        if (firstRes.data.artists.length < 1) {
+            throw new Error(`No artists found for genre ${genre}.`);
+        }
 
         const total = firstRes.data.count;
         const allArtists: Artist[] = [];
@@ -122,6 +134,8 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
 
         // Save to cache
         saveToCache(cacheFilePath, artistStruct, CACHE_DIR);
+
+        console.log(`${genre} artists saved to cache.`)
 
         return artistStruct;
     } catch (error) {

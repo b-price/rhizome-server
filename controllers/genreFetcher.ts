@@ -35,14 +35,14 @@ const fetchGenres = async (limit: number, offset: number): Promise<Genre[]> => {
     return res.data.genres.map(({ id, name }) => ({ id, name }));
 };
 
-export const getAllGenres = async (): Promise<Genre[]> => {
+export const getAllGenres = async (): Promise<GenresJSON> => {
     const cacheFilePath = path.join(CACHE_DIR, 'allGenres.json');
 
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
     if (cachedData && "genres" in cachedData) {
         console.log('Returning cached genres data');
-        return cachedData.genres;
+        return cachedData;
     }
 
     console.log('Fetching fresh genres data from API');
@@ -72,7 +72,7 @@ export const getAllGenres = async (): Promise<Genre[]> => {
 
         saveToCache(cacheFilePath, genresData, CACHE_DIR);
 
-        return allGenres;
+        return genresData;
     } catch (error) {
         console.error('Error fetching genres:', error);
         throw error;
