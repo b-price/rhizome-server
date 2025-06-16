@@ -24,6 +24,7 @@ interface Artist {
     tags: Tag[];
     location?: string;
     startDate?: string;
+    endDate?: string;
 }
 
 interface ArtistResponse {
@@ -85,7 +86,8 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
             name: artist.name,
             tags: tags,
             location: artist.area ? artist.area.name : undefined,
-            startDate: artist["life-span"] ? artist["life-span"].begin : undefined,
+            startDate: artist["life-span"] && artist["life-span"].begin ? artist["life-span"].begin.slice(0, 4) : undefined,
+            endDate: artist["life-span"] && artist["life-span"].end ? artist["life-span"].end.slice(0, 4) : undefined,
         }
     });
 };
