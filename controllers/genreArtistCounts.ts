@@ -15,7 +15,7 @@ const GENRE = false;
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const BASE_URL = `${process.env.MB_URL}artist?query=${GENRE ? 'genre' : 'tag'}:`;
 const EXCLUDED = '%20NOT%20artist:%22Various%20Artists%22%20NOT%20artist:\[unknown\]';
-const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
+const CACHE_DIR = path.join(process.cwd(), 'data');
 const CACHE_DURATION_DAYS = 120;
 
 const genreMap = new Map<string, number>();
@@ -45,7 +45,7 @@ export const getGenreArtistCounts = async () => {
 
     const allGenres = await getAllGenres();
     if (!allGenres || allGenres.genres.length === 0) {
-        throw new Error('No genres found!');
+        throw new Error('No genreArtists found!');
     }
 
     try {

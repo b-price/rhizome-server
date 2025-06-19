@@ -9,8 +9,8 @@ router.get('/', async (req, res) => {
         const genres = await getAllGenres();
         res.json(genres);
     } catch (err) {
-        console.error('Failed to fetch genres:', err);
-        res.status(500).json({ error: 'Failed to fetch genres' });
+        console.error('Failed to fetch genreArtists:', err);
+        res.status(500).json({ error: 'Failed to fetch genreArtists' });
     }
 });
 

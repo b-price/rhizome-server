@@ -47,7 +47,7 @@ const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${proce
 const BASE_URL = `${process.env.MB_URL}artist?query=${GENRE ? 'genre' : 'tag'}:`;
 const EXCLUDED = '%20NOT%20artist:%22Various%20Artists%22%20NOT%20artist:\[unknown\]';
 const LIMIT = 100;
-const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
+const CACHE_DIR = path.join(process.cwd(), 'data', 'genreArtists');
 const CACHE_DURATION_DAYS = 60;
 
 const tagMap = new Map<string, string[]>();

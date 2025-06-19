@@ -1,4 +1,4 @@
 node_modules
 .idea
-data
+data/genreArtists
 .env

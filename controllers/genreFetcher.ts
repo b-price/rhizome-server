@@ -22,7 +22,7 @@ export interface GenresJSON {
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const BASE_URL = `${process.env.MB_URL}genre/all`;
 const LIMIT = 100;
-const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
+const CACHE_DIR = path.join(process.cwd(), 'data');
 const CACHE_DURATION_DAYS = 60;
 
 const fetchGenres = async (limit: number, offset: number): Promise<Genre[]> => {
@@ -41,11 +41,11 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
     if (cachedData && "genres" in cachedData) {
-        console.log('Returning cached genres data');
+        console.log('Returning cached genreArtists data');
         return cachedData;
     }
 
-    console.log('Fetching fresh genres data from API');
+    console.log('Fetching fresh genreArtists data from API');
 
     try {
         const firstRes = await axios.get<GenreResponse>(`${BASE_URL}?limit=1&offset=0`, {
@@ -74,7 +74,7 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
 
         return genresData;
     } catch (error) {
-        console.error('Error fetching genres:', error);
+        console.error('Error fetching genreArtists:', error);
         throw error;
     }
 };
