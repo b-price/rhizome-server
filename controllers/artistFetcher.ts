@@ -27,7 +27,7 @@ interface Artist {
     endDate?: string;
 }
 
-interface ArtistResponse {
+export interface ArtistResponse {
     count: number;
     artists: ArtistData[];
 }
@@ -42,8 +42,9 @@ export interface ArtistJSON {
 
 export type ArtistLink = [string, string];
 
+const GENRE = false;
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
-const BASE_URL = `${process.env.MB_URL}artist?query=tag:`;
+const BASE_URL = `${process.env.MB_URL}artist?query=${GENRE ? 'genre' : 'tag'}:`;
 const EXCLUDED = '%20NOT%20artist:%22Various%20Artists%22%20NOT%20artist:\[unknown\]';
 const LIMIT = 100;
 const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
@@ -127,7 +128,7 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
     console.log(`Fetching fresh artists data for genre: ${genre} ...`);
 
     try {
-        const noAmpGenre = genre.replaceAll('&', '%26')
+        const noAmpGenre = genre.replaceAll('&', '%26');
         tagMap.clear();
         const firstRes = await axios.get<ArtistResponse>(`${BASE_URL}${noAmpGenre}&limit=1&offset=0`, {
             headers: {

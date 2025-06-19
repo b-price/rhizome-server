@@ -1,6 +1,7 @@
 import fs from "fs";
 import {ArtistJSON} from "../controllers/artistFetcher";
 import {GenresJSON} from "../controllers/genreFetcher";
+import {GenreArtistCountsJSON} from "../controllers/genreArtistCounts";
 
 export const ensureCacheDir = (cacheDir: string) => {
     try {
@@ -28,7 +29,7 @@ export const isCacheValid = (filePath: string, cacheDurationDays: number): boole
     }
 };
 
-export const loadFromCache = (filePath: string, cacheDurationDays: number): ArtistJSON | GenresJSON | null => {
+export const loadFromCache = (filePath: string, cacheDurationDays: number): ArtistJSON | GenresJSON | GenreArtistCountsJSON | null => {
     try {
         if (!isCacheValid(filePath, cacheDurationDays)) {
             return null;
@@ -42,7 +43,7 @@ export const loadFromCache = (filePath: string, cacheDurationDays: number): Arti
     }
 };
 
-export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON, cacheDir: string): void => {
+export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON | GenreArtistCountsJSON, cacheDir: string): void => {
     try {
         ensureCacheDir(cacheDir);
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -50,3 +51,11 @@ export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON, cac
         console.error('Error saving to cache:', error);
     }
 };
+
+export const deleteCacheDir = (cacheDir: string): void => {
+    try {
+        fs.unlinkSync(cacheDir);
+    } catch (error) {
+        console.error('Error deleting cache:', error);
+    }
+}

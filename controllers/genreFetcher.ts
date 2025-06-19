@@ -3,7 +3,7 @@ import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
 
-interface Genre {
+export interface Genre {
     id: string;
     name: string;
 }
