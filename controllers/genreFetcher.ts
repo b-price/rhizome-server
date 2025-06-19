@@ -41,11 +41,11 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
     if (cachedData && "genres" in cachedData) {
-        console.log('Returning cached genreArtists data');
+        console.log('Returning cached genres data');
         return cachedData;
     }
 
-    console.log('Fetching fresh genreArtists data from API');
+    console.log('Fetching fresh genres data from API');
 
     try {
         const firstRes = await axios.get<GenreResponse>(`${BASE_URL}?limit=1&offset=0`, {
@@ -74,7 +74,7 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
 
         return genresData;
     } catch (error) {
-        console.error('Error fetching genreArtists:', error);
+        console.error('Error fetching genres:', error);
         throw error;
     }
 };

@@ -45,7 +45,7 @@ export const getGenreArtistCounts = async () => {
 
     const allGenres = await getAllGenres();
     if (!allGenres || allGenres.genres.length === 0) {
-        throw new Error('No genreArtists found!');
+        throw new Error('No genres found!');
     }
 
     try {
