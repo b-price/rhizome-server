@@ -1,15 +1,10 @@
 import axios from 'axios';
 import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
-import {createLinks} from "../utils/createLinks";
+import {createArtistLinks} from "../utils/createArtistLinks";
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
 import {getAllGenres} from "./genreFetcher";
-import {ArtistResponse} from "./artistFetcher";
-
-export interface GenreArtistCountsJSON {
-    genreMap: { [k: string]: number; };
-    date: string;
-}
+import {ArtistResponse, GenreArtistCountsJSON} from "../types";
 
 const GENRE = false;
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
@@ -54,7 +49,6 @@ export const getGenreArtistCounts = async () => {
         for (const genre of allGenres.genres) {
             const count = await throttleQueue.enqueue(() => fetchArtistsCount(`"${genre.name.replaceAll('&', '%26')}"`));
             genreMap.set(genre.id, count);
-            console.log(genre.name, count)
         }
 
         const genreCounts: GenreArtistCountsJSON = {

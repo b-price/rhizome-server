@@ -1,46 +1,9 @@
 import axios from 'axios';
 import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
-import {createLinks} from "../utils/createLinks";
+import {createArtistLinks} from "../utils/createArtistLinks";
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
-
-interface Tag {
-    name: string;
-    count: number;
-}
-
-interface ArtistData {
-    id: string;
-    name: string;
-    score: number;
-    tags: Tag[];
-    area: { name: string };
-    "life-span": { begin: string, end: string };
-}
-
-interface Artist {
-    id: string;
-    name: string;
-    tags: Tag[];
-    location?: string;
-    startDate?: string;
-    endDate?: string;
-}
-
-export interface ArtistResponse {
-    count: number;
-    artists: ArtistData[];
-}
-
-export interface ArtistJSON {
-    count: number;
-    artists: Artist[];
-    links: ArtistLink[];
-    date: string;
-    genre: string;
-}
-
-export type ArtistLink = [string, string];
+import {Artist, ArtistJSON, ArtistResponse, Tag} from "../types";
 
 const GENRE = false;
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
@@ -71,7 +34,7 @@ const fetchArtists = async (limit: number, offset: number, genre: string): Promi
         // Creates decade-location map while iterating through the artists
         let tags: Tag[] = [];
         if (artist.tags && artist.tags.length) {
-            tags = artist.tags.filter(t => t.count > 0 && !genreIsEqual(t.name, genre));
+            tags = artist.tags.filter((t: Tag) => t.count > 0 && !genreIsEqual(t.name, genre));
         }
 
         const location = artist.area ? artist.area.name : undefined;
@@ -152,7 +115,7 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
         const artistStruct: ArtistJSON = {
             count: total,
             artists: allArtists,
-            links: createLinks(tagMap),
+            links: createArtistLinks(tagMap),
             date: new Date().toISOString(),
             genre: genre
         };

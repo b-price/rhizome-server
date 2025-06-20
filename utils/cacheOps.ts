@@ -1,7 +1,5 @@
 import fs from "fs";
-import {ArtistJSON} from "../controllers/artistFetcher";
-import {GenresJSON} from "../controllers/genreFetcher";
-import {GenreArtistCountsJSON} from "../controllers/genreArtistCounts";
+import {ArtistJSON, GenreArtistCountsJSON, GenresJSON} from "../types";
 
 export const ensureCacheDir = (cacheDir: string) => {
     try {
