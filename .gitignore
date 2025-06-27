@@ -3,3 +3,4 @@ node_modules
 data/genreArtists
 data/artists
 .env
+dist
