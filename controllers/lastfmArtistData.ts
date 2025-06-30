@@ -31,7 +31,7 @@ export const getArtistData = async (mbid: string) => {
             }),
             ontour: parseInt(data.ontour) === 1,
             stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
-            bio: {link: data.bio.links.link.href, summary: data.bio.summary, content: data.bio.content},
+            bio: {link: data.bio.links.link.href, summary: data.bio.summary, content: data.bio.content.split('<a')[0]},
             similar: data.similar.artist.map((a: {name: string}) => a.name),
             date: new Date().toISOString()
         }

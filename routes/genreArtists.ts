@@ -1,6 +1,7 @@
 import express from "express";
 import {getAllArtists} from "../controllers/artistFetcher";
 import {getArtistData} from "../controllers/lastfmArtistData";
+import {getArtistImage} from "../controllers/getArtistImage";
 
 const router = express.Router();
 
@@ -21,6 +22,16 @@ router.get('/data/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch artist:', err);
         res.status(500).json({ error: 'Failed to fetch artist data' });
+    }
+});
+
+router.get('/image/:id', async (req, res) => {
+    try {
+        const image = await getArtistImage(req.params.id);
+        res.json(image);
+    } catch (err) {
+        console.error('Failed to fetch artist image:', err);
+        res.status(500).json({ error: 'Failed to fetch artist image' });
     }
 })
 

@@ -23,6 +23,7 @@ export interface Artist {
     location?: string;
     startDate?: string;
     endDate?: string;
+    image?: string;
 }
 
 interface ArtistData {
@@ -32,6 +33,7 @@ interface ArtistData {
     tags: Tag[];
     area: { name: string };
     "life-span": { begin: string, end: string };
+    relations: { type: string, url: { resource: string } }[];
 }
 
 export interface ArtistResponse {
