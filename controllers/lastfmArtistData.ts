@@ -29,7 +29,11 @@ export const getArtistData = async (mbid: string, artistName: string) => {
             mbid: data.mbid,
             ontour: parseInt(data.ontour) === 1,
             stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
-            bio: {link: data.bio.links.link.href, summary: data.bio.summary, content: data.bio.content.split('<a')[0]},
+            bio: {
+                link: data.bio.links.link.href,
+                summary: data.bio.summary.replaceAll(/<.*>/g, ''),
+                content: data.bio.content.replaceAll(/<.*>/g, '')
+            },
             similar: data.similar.artist.map((a: {name: string}) => a.name),
             date: new Date().toISOString()
         }
@@ -54,7 +58,11 @@ export const getArtistData = async (mbid: string, artistName: string) => {
                 mbid: data.mbid,
                 ontour: parseInt(data.ontour) === 1,
                 stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
-                bio: {link: data.bio.links.link.href, summary: data.bio.summary, content: data.bio.content.split('<a')[0]},
+                bio: {
+                    link: data.bio.links.link.href,
+                    summary: data.bio.summary.replaceAll(/<.*>/g, ''),
+                    content: data.bio.content.replaceAll(/<.*>/g, '')
+                },
                 similar: data.similar.artist.map((a: {name: string}) => a.name),
                 date: new Date().toISOString()
             }
