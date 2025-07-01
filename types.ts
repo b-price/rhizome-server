@@ -2,9 +2,6 @@ export interface Genre {
     id: string;
     name: string;
     artistCount: number;
-    color?: string;
-    top?: number;
-    left?: number;
 }
 
 export interface GenresJSON {
