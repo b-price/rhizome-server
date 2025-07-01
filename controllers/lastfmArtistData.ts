@@ -1,14 +1,14 @@
 import path from "path";
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
 import axios from "axios";
-import {LastFMArtistJSON, LastFMImage} from "../types";
+import {LastFMArtistJSON} from "../types";
 
 const BASE_URL = `${process.env.LASTFM_URL}?method=artist.getinfo&mbid=`;
 const URL_CONFIG = `&api_key=${process.env.LASTFM_API_KEY}&format=json`;
 const CACHE_DIR = path.join(process.cwd(), 'data', 'artists');
 const CACHE_DURATION_DAYS = 30;
 
-export const getArtistData = async (mbid: string) => {
+export const getArtistData = async (mbid: string, artistName: string) => {
     const cacheFilePath = path.join(CACHE_DIR, `${mbid}.json`);
 
     // Try to load from cache first
@@ -26,9 +26,6 @@ export const getArtistData = async (mbid: string) => {
         const artistData: LastFMArtistJSON = {
             name: data.name,
             mbid: data.mbid,
-            image: data.image.map((img: {'#text': string, size: string}) => {
-                return {link: img['#text'], size: img.size};
-            }),
             ontour: parseInt(data.ontour) === 1,
             stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
             bio: {link: data.bio.links.link.href, summary: data.bio.summary, content: data.bio.content.split('<a')[0]},
