@@ -15,7 +15,7 @@ export const getArtistImage = async (mbid: string) => {
         let image;
         if (res.data.relations) {
             image = res.data.relations.find((r: { type: string; }) => r.type === 'image')?.url.resource;
-            if (image.startsWith('https://commons.wikimedia.org/wiki/File:')) {
+            if (image && image.startsWith('https://commons.wikimedia.org/wiki/File:')) {
                 const filename = image.substring(image.lastIndexOf('/') + 1);
                 image = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' + filename;
             }
