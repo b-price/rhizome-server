@@ -1,0 +1,60 @@
+{
+  "count": 2041,
+  "genres": [
+    {
+      "id": "18797864-41b0-4602-8241-adbee761774c",
+      "name": "2 tone",
+      "artistCount": 17
+    },
+    {
+      "id": "db325bd7-ae64-40bd-966a-a3af3cef8bb9",
+      "name": "2-step",
+      "artistCount": 14
+    },
+    {
+      "id": "e009a9c2-c20c-40d9-9bb6-4e098676ea9c",
+      "name": "abstract hip hop",
+      "artistCount": 73
+    },
+    {
+      "id": "c755b4da-de34-4d64-909a-9447833315ce",
+      "name": "acid breaks",
+      "artistCount": 13
+    },
+    {
+      "id": "54c01942-22fd-4184-9877-1db0089b18f1",
+      "name": "acid house",
+      "artistCount": 52
+    },
+    {
+      "id": "7dc2b20f-3953-4874-b9bf-41b8ba06d20c",
+      "name": "acid jazz",
+      "artistCount": 179
+    },
+    {
+      "id": "ef063b60-3206-466c-a7d8-7d317fcdf9fc",
+      "name": "acid rock",
+      "artistCount": 169
+    },
+    {
+      "id": "ba64013e-27bb-4f14-a530-8d25b296e0da",
+      "name": "acid techno",
+      "artistCount": 78
+    },
+    {
+      "id": "267433bc-721d-4d60-8455-e6ed1e0b922f",
+      "name": "acid trance",
+      "artistCount": 13
+    },
+    {
+      "id": "fcc58a18-9326-4c92-8b29-c294d44379c3",
+      "name": "afrobeat",
+      "artistCount": 470
+    },
+    {
+      "id": "b8793fdb-bbc8-4418-a6f8-05eafbbe07ef",
+      "name": "afrobeats",
+      "artistCount": 254
+    }
+  ]
+}

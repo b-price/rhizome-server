@@ -102,3 +102,7 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         throw error;
     }
 };
+
+export const mergeGenres = async () => {
+
+}

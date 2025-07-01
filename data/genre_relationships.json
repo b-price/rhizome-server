@@ -1,0 +1,283 @@
+[
+  {
+    "id": "18797864-41b0-4602-8241-adbee761774c",
+    "name": "2 tone",
+    "artistCount": 17,
+    "subgenre_of": [
+      {
+        "id": "65877068-2116-4af6-89a2-838179a7e103",
+        "name": "ska"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "18d6ad2c-83d2-402f-972c-dd75b4b2f34b",
+        "name": "third wave ska"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": []
+  },
+  {
+    "id": "db325bd7-ae64-40bd-966a-a3af3cef8bb9",
+    "name": "2-step",
+    "artistCount": 14,
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": []
+  },
+  {
+    "id": "e009a9c2-c20c-40d9-9bb6-4e098676ea9c",
+    "name": "abstract hip hop",
+    "artistCount": 73,
+    "subgenre_of": [
+      {
+        "id": "52faa157-6bad-4d86-a0ab-d4dec7d2513c",
+        "name": "hip hop"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": []
+  },
+  {
+    "id": "c755b4da-de34-4d64-909a-9447833315ce",
+    "name": "acid breaks",
+    "artistCount": 13,
+    "subgenre_of": [
+      {
+        "id": "3b8f3f65-6caa-47c8-b076-fa59dfb69c43",
+        "name": "breakbeat"
+      }
+    ],
+    "influenced_by": [
+      {
+        "id": "54c01942-22fd-4184-9877-1db0089b18f1",
+        "name": "acid house"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_genres": []
+  },
+  {
+    "id": "54c01942-22fd-4184-9877-1db0089b18f1",
+    "name": "acid house",
+    "artistCount": 52,
+    "subgenre_of": [
+      {
+        "id": "a2782cb6-1cd0-477c-a61d-b3f8b42dd1b3",
+        "name": "house"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "c755b4da-de34-4d64-909a-9447833315ce",
+        "name": "acid breaks"
+      },
+      {
+        "id": "ba64013e-27bb-4f14-a530-8d25b296e0da",
+        "name": "acid techno"
+      },
+      {
+        "id": "267433bc-721d-4d60-8455-e6ed1e0b922f",
+        "name": "acid trance"
+      },
+      {
+        "id": "2f2118d7-315b-4241-bf40-d5d6ca11348d",
+        "name": "gabber"
+      },
+      {
+        "id": "9c5052e0-36ff-4b92-9447-58f44ffdf682",
+        "name": "hard house"
+      },
+      {
+        "id": "2afc2320-384f-43a4-a71e-1b763c485045",
+        "name": "trance"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": []
+  },
+  {
+    "id": "7dc2b20f-3953-4874-b9bf-41b8ba06d20c",
+    "name": "acid jazz",
+    "artistCount": 179,
+    "fusion_of": [
+      {
+        "id": "fe4ba6a1-9873-4fd0-a12b-a70c81818514",
+        "name": "funk"
+      },
+      {
+        "id": "52faa157-6bad-4d86-a0ab-d4dec7d2513c",
+        "name": "hip hop"
+      },
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      },
+      {
+        "id": "1b5e7b16-336b-473e-a364-5120413a9827",
+        "name": "soul"
+      }
+    ],
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "influenced_by": [],
+    "influenced_genres": []
+  },
+  {
+    "id": "ef063b60-3206-466c-a7d8-7d317fcdf9fc",
+    "name": "acid rock",
+    "artistCount": 169,
+    "subgenre_of": [
+      {
+        "id": "146ef761-5ad9-48b4-b0b3-483104f7da48",
+        "name": "psychedelic rock"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "51cb9f91-e6a2-41bf-891f-e78e3f1e52ab",
+        "name": "hard rock"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": []
+  },
+  {
+    "id": "ba64013e-27bb-4f14-a530-8d25b296e0da",
+    "name": "acid techno",
+    "artistCount": 78,
+    "subgenre_of": [
+      {
+        "id": "41fe3260-fcc1-450b-bd5a-803886c56912",
+        "name": "techno"
+      }
+    ],
+    "influenced_by": [
+      {
+        "id": "54c01942-22fd-4184-9877-1db0089b18f1",
+        "name": "acid house"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "4bcbf8f0-e8bc-403c-93d4-cf2b4385cecd",
+        "name": "acidcore"
+      },
+      {
+        "id": "c802c2be-2351-4478-b6a1-003fdb8733c9",
+        "name": "birmingham sound"
+      },
+      {
+        "id": "ed2e5e6b-2af6-4c7c-a9fb-e2e886bfda38",
+        "name": "hard techno"
+      },
+      {
+        "id": "e7c41e03-c3df-4841-a9e8-3451bbbac0de",
+        "name": "peak time techno"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": []
+  },
+  {
+    "id": "267433bc-721d-4d60-8455-e6ed1e0b922f",
+    "name": "acid trance",
+    "artistCount": 13,
+    "subgenre_of": [
+      {
+        "id": "2afc2320-384f-43a4-a71e-1b763c485045",
+        "name": "trance"
+      }
+    ],
+    "influenced_by": [
+      {
+        "id": "54c01942-22fd-4184-9877-1db0089b18f1",
+        "name": "acid house"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "c8acb78a-8337-4eae-9d19-48220dba03ac",
+        "name": "hard trance"
+      },
+      {
+        "id": "b3cccf71-e843-4546-87fa-728055ba3147",
+        "name": "psytrance"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": []
+  },
+  {
+    "id": "fcc58a18-9326-4c92-8b29-c294d44379c3",
+    "name": "afrobeat",
+    "artistCount": 470,
+    "fusion_of": [
+      {
+        "id": "fe4ba6a1-9873-4fd0-a12b-a70c81818514",
+        "name": "funk"
+      },
+      {
+        "id": "a394e4ba-1fff-4fca-a2e8-30e789a8b6e8",
+        "name": "highlife"
+      },
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "081b044a-5924-4307-8ba1-943f92a0f6e2",
+        "name": "maloya \u00e9lektrik"
+      }
+    ],
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "influenced_by": []
+  },
+  {
+    "id": "b8793fdb-bbc8-4418-a6f8-05eafbbe07ef",
+    "name": "afrobeats",
+    "artistCount": 254,
+    "subgenres": [
+      {
+        "id": "d42b567f-0952-424b-959d-bee6e5961cc0",
+        "name": "afropiano"
+      },
+      {
+        "id": "7c4d0994-4c49-4c74-8763-df27fc0084cc",
+        "name": "alt\u00e9"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "52349b68-9cad-496e-8785-00d53f410246",
+        "name": "afroswing"
+      }
+    ],
+    "subgenre_of": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": []
+  }
+]
