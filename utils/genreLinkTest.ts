@@ -22,7 +22,7 @@ interface ExtendedGenre {
 function runGenreLinkTest() {
     try {
         // Read the genres from the JSON file
-        const filePath = path.join(__dirname, 'filtered_genres.json');
+        const filePath = path.join('../data/filtered_genres.json');
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         const genres: ExtendedGenre[] = JSON.parse(fileContent);
 
@@ -37,7 +37,7 @@ function runGenreLinkTest() {
 
         // Display some sample links
         console.log('\nSample links:');
-        const sampleSize = Math.min(10, links.length);
+        const sampleSize = Math.min(100, links.length);
         for (let i = 0; i < sampleSize; i++) {
             const link = links[i];
             const sourceGenre = genres.find(g => g.id === link.source);

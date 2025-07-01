@@ -1,4 +1,4 @@
-import { NodeLink } from './types';
+import { NodeLink } from '../types';
 
 interface GenreRelation {
     id: string;
