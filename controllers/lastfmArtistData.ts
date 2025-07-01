@@ -45,6 +45,10 @@ export const getArtistData = async (mbid: string, artistName: string) => {
         try {
             const res = await axios.get(`${BASE_URL}artist=${encodeURIComponent(artistName)}${URL_CONFIG}`);
             const data = res.data.artist;
+            if (data && data.mbid && data.mbid !== mbid) {
+                console.log("MBID of returned artist exists and does not match artist")
+                throw mbidError;
+            }
             const artistData: LastFMArtistJSON = {
                 name: data.name,
                 mbid: data.mbid,
