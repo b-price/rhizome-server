@@ -21,7 +21,7 @@ interface SimpleGenre {
     artistCount: number;
 }
 
-function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<cheerio.Element>, genreIds: Set<string>): GenreRelation[] {
+function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>, genreIds: Set<string>): GenreRelation[] {
     const links: GenreRelation[] = [];
 
     cell.find('a[href]').each((_, element) => {
