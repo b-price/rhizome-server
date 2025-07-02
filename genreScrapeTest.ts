@@ -37,4 +37,4 @@ async function main() {
     }
 }
 
-main();
+main().catch((err) => {console.log(err)});

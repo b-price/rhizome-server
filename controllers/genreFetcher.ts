@@ -2,13 +2,9 @@ import axios from 'axios';
 import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
-import {ArtistResponse, Genre, GenresJSON, NodeLink} from "../types";
+import {ArtistResponse, Genre, GenresJSON, MBGenre, NodeLink} from "../types";
 import {genreLinksByName} from "../utils/genreLinksByName";
-
-interface MBGenre {
-    id: number;
-    name: string;
-}
+import {genreLinksByRelation} from "../utils/genreLinksByRelation";
 
 interface GenreResponse {
     'genre-count': number;
@@ -20,7 +16,7 @@ const BASE_URL = `${process.env.MB_URL}genre/all`;
 const ARTISTS_URL = `${process.env.MB_URL}artist?query=tag:`;
 const EXCLUDED = '%20NOT%20artist:%22Various%20Artists%22%20NOT%20artist:\[unknown\]';
 const LIMIT = 100;
-const CACHE_DIR = path.join(process.cwd(), 'data');
+const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
 const CACHE_DURATION_DAYS = 120;
 const FILTER_THRESHOLD = 0;
 
@@ -50,9 +46,9 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
 
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
-    if (cachedData && "genres" in cachedData) {
+    if (cachedData.valid === 'valid' && cachedData.data && "genres" in cachedData.data) {
         console.log('Returning cached genres data');
-        return cachedData;
+        return cachedData.data;
     }
 
     console.log('Fetching fresh genres data from API...');
@@ -68,6 +64,7 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         const total = firstRes.data['genre-count'];
         const allGenres: Genre[] = [];
 
+        // Retrieve each page of genres (100 per request)
         for (let offset = 0; offset < total; offset += LIMIT) {
             const genres = await throttleQueue.enqueue(() => fetchGenres(LIMIT, offset));
             allGenres.push(...genres);
@@ -77,17 +74,21 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
             throw new Error('No genres found!');
         }
 
+        // Get the artist count of each genre (slow, avoid if possible)
         for (const genre of allGenres) {
             genre.artistCount = await throttleQueue
                 .enqueue(() => fetchArtistsCount(`"${genre.name.replaceAll('&', '%26')}"`));
         }
 
+        // Filter out genres with no artists
         const filteredGenres = allGenres.filter(g => g.artistCount > FILTER_THRESHOLD);
-        const links = genreLinksByName(filteredGenres);
+
+        // Generate links
+        const links = genreLinksByRelation(filteredGenres);
 
         // Save to cache
         const genresData: GenresJSON = {
-            count: total,
+            count: filteredGenres.length,
             genres: filteredGenres,
             links,
             date: new Date().toISOString()
@@ -102,7 +103,3 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         throw error;
     }
 };
-
-export const mergeGenres = async () => {
-
-}

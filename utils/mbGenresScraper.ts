@@ -1,10 +1,10 @@
 import * as cheerio from 'cheerio';
-import { Genre, GenreRelation } from '../types';
+import {Genre, MBGenre, SimpleGenre} from '../types';
 
 const BASE_URL = "https://musicbrainz.org/genre/";
 const HEADERS = { "User-Agent": "GenreScraper/1.1 (example@example.com)" };
 
-const TARGET_ROWS: { [key: string]: keyof Genre } = {
+const TARGET_ROWS: { [key: string]: GenreRelationKeys } = {
     "subgenre of:": "subgenre_of",
     "subgenres:": "subgenres",
     "has fusion genres:": "fusion_genres",
@@ -15,14 +15,12 @@ const TARGET_ROWS: { [key: string]: keyof Genre } = {
 
 const UUID_RE = /\/genre\/([0-9a-f\-]{36})/i;
 
-interface SimpleGenre {
-    id: string;
-    name: string;
-    artistCount: number;
-}
+type GenreRelationKeys = {
+    [K in keyof Genre]: Genre[K] extends MBGenre[] ? K : never
+}[keyof Genre];
 
-function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>, genreIds: Set<string>): GenreRelation[] {
-    const links: GenreRelation[] = [];
+function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>, genreIds: Set<string>): MBGenre[] {
+    const links: MBGenre[] = [];
 
     cell.find('a[href]').each((_, element) => {
         const href = $(element).attr('href');

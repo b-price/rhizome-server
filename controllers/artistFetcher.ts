@@ -83,9 +83,9 @@ export const getAllArtists = async (genre: string): Promise<ArtistJSON> => {
 
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
-    if (cachedData && 'artists' in cachedData) {
+    if (cachedData.data && 'artists' in cachedData.data) {
         console.log(`Returning cached artists data for genre: ${genre}`);
-        return cachedData;
+        return cachedData.data;
     }
 
     console.log(`Fetching fresh artists data for genre: ${genre} ...`);
