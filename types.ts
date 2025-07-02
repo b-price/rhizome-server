@@ -62,17 +62,11 @@ export interface NodeLink {
 export interface LastFMArtistJSON {
     name: string;
     mbid: string;
-    image: LastFMImage[];
     ontour: boolean;
     stats: LastFMStats;
     bio: LastFMBio;
     similar: string[];
     date: string;
-}
-
-export interface LastFMImage {
-    link: string;
-    size: string;
 }
 
 export interface LastFMStats {

@@ -15,9 +15,9 @@ router.get('/:genre', async (req, res) => {
     }
 });
 
-router.get('/data/:id', async (req, res) => {
+router.get('/data/:id/:name', async (req, res) => {
     try {
-        const artistData = await getArtistData(req.params.id);
+        const artistData = await getArtistData(req.params.id, req.params.name);
         res.json(artistData);
     } catch (err) {
         console.error('Failed to fetch artist:', err);
