@@ -1,9 +1,3 @@
-export interface Genre {
-    id: string;
-    name: string;
-    artistCount: number;
-}
-
 export interface GenresJSON {
     count: number;
     genres: Genre[];
@@ -78,4 +72,21 @@ export interface LastFMBio {
     link: string;
     summary: string;
     content: string;
+}
+
+export interface GenreRelation {
+    id: string;
+    name: string;
+}
+
+export interface Genre {
+    id: string;
+    name: string;
+    artistCount: number;
+    subgenre_of: GenreRelation[];
+    influenced_genres: GenreRelation[];
+    subgenres: GenreRelation[];
+    fusion_genres: GenreRelation[];
+    fusion_of: GenreRelation[];
+    influenced_by: GenreRelation[];
 }

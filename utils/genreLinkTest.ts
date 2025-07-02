@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { createGenreLinks } from './genreLinks';
+import { genreLinksByRelation } from './genreLinksByRelation';
 
 interface GenreRelation {
     id: string;
@@ -30,7 +30,7 @@ function runGenreLinkTest() {
 
         // Measure performance
         const startTime = Date.now();
-        const links = createGenreLinks(genres);
+        const links = genreLinksByRelation(genres);
         const endTime = Date.now();
 
         console.log(`Generated ${links.length} unique links in ${endTime - startTime}ms`);

@@ -1,23 +1,6 @@
-import { NodeLink } from '../types';
+import {Genre, NodeLink} from '../types';
 
-interface GenreRelation {
-    id: string;
-    name: string;
-}
-
-interface ExtendedGenre {
-    id: string;
-    name: string;
-    artistCount: number;
-    subgenre_of: GenreRelation[];
-    influenced_genres: GenreRelation[];
-    subgenres: GenreRelation[];
-    fusion_genres: GenreRelation[];
-    fusion_of: GenreRelation[];
-    influenced_by: GenreRelation[];
-}
-
-export function createGenreLinks(genres: ExtendedGenre[]): NodeLink[] {
+export function genreLinksByRelation(genres: Genre[]): NodeLink[] {
     const linkSet = new Set<string>();
     const links: NodeLink[] = [];
 
@@ -37,7 +20,7 @@ export function createGenreLinks(genres: ExtendedGenre[]): NodeLink[] {
 
     // Process each genre and its relationships
     for (const genre of genres) {
-        const relationshipFields: (keyof Pick<ExtendedGenre,
+        const relationshipFields: (keyof Pick<Genre,
             'subgenre_of' | 'influenced_genres' | 'subgenres' |
             'fusion_genres' | 'fusion_of' | 'influenced_by'>)[] = [
             'subgenre_of',

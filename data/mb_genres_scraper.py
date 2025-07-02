@@ -50,7 +50,6 @@ def scrape_single(genre: Dict[str, Any]) -> Dict[str, Any]:
             "id": genre_id,
             "name": name,
             "artistCount": artist_count,
-            "wikipedia": None,
             **{k: [] for k in TARGET_ROWS.values()}
         }
 
@@ -75,7 +74,6 @@ def scrape_single(genre: Dict[str, Any]) -> Dict[str, Any]:
             "id": genre_id,
             "name": name,
             "artistCount": artist_count,
-            #"wikipedia": wikipedia_text,
             **{k: [] for k in TARGET_ROWS.values()}
         }
 
@@ -86,7 +84,6 @@ def scrape_single(genre: Dict[str, Any]) -> Dict[str, Any]:
             "id": genre_id,
             "name": name,
             "artistCount": artist_count,
-            #"wikipedia": wikipedia_text,
             **{k: [] for k in TARGET_ROWS.values()}
         }
 
@@ -94,7 +91,6 @@ def scrape_single(genre: Dict[str, Any]) -> Dict[str, Any]:
         "id": genre_id,
         "name": name,
         "artistCount": artist_count,
-        #"wikipedia": wikipedia_text,
     }
 
     for row in table.find_all("tr"):

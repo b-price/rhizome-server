@@ -3,7 +3,7 @@ import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
 import {ArtistResponse, Genre, GenresJSON, NodeLink} from "../types";
-import {createGenreLinks} from "../utils/createGenreLinks";
+import {genreLinksByName} from "../utils/genreLinksByName";
 
 interface MBGenre {
     id: number;
@@ -83,7 +83,7 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         }
 
         const filteredGenres = allGenres.filter(g => g.artistCount > FILTER_THRESHOLD);
-        const links = createGenreLinks(filteredGenres);
+        const links = genreLinksByName(filteredGenres);
 
         // Save to cache
         const genresData: GenresJSON = {
