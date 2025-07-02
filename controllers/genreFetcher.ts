@@ -5,6 +5,7 @@ import {loadFromCache, saveToCache} from "../utils/cacheOps";
 import {ArtistResponse, Genre, GenresJSON, MBGenre, NodeLink} from "../types";
 import {genreLinksByName} from "../utils/genreLinksByName";
 import {genreLinksByRelation} from "../utils/genreLinksByRelation";
+import {scrapeGenres} from "../utils/mbGenresScraper";
 
 interface GenreResponse {
     'genre-count': number;
@@ -74,6 +75,27 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
             throw new Error('No genres found!');
         }
 
+        // Check if we have stale cache data and if the genre list is the same
+        if (cachedData.valid === 'stale' && cachedData.data && "genres" in cachedData.data) {
+            const cachedGenreIds = new Set(cachedData.data.genres.map(g => g.id));
+            const currentGenreIds = new Set(allGenres.map(g => g.id));
+
+            // Check if the sets are identical
+            const sameGenres = cachedGenreIds.size === currentGenreIds.size &&
+                [...cachedGenreIds].every(id => currentGenreIds.has(id));
+
+            if (sameGenres) {
+                console.log('Genre list unchanged, reusing stale cache data');
+                const reusedData: GenresJSON = {
+                    ...cachedData.data,
+                    date: new Date().toISOString()
+                };
+                saveToCache(cacheFilePath, reusedData, CACHE_DIR);
+                console.log('Stale cache data refreshed and saved');
+                return reusedData;
+            }
+        }
+
         // Get the artist count of each genre (slow, avoid if possible)
         for (const genre of allGenres) {
             genre.artistCount = await throttleQueue
@@ -83,13 +105,17 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         // Filter out genres with no artists
         const filteredGenres = allGenres.filter(g => g.artistCount > FILTER_THRESHOLD);
 
+        // Scrape genre relations from MusicBrainz
+        console.log('Scraping genre relations from MusicBrainz...');
+        const scrapedGenres = await scrapeGenres(filteredGenres, 300);
+
         // Generate links
-        const links = genreLinksByRelation(filteredGenres);
+        const links = genreLinksByRelation(scrapedGenres);
 
         // Save to cache
         const genresData: GenresJSON = {
-            count: filteredGenres.length,
-            genres: filteredGenres,
+            count: scrapedGenres.length,
+            genres: scrapedGenres,
             links,
             date: new Date().toISOString()
         };
