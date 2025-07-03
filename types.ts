@@ -1,9 +1,3 @@
-export interface Genre {
-    id: string;
-    name: string;
-    artistCount: number;
-}
-
 export interface GenresJSON {
     count: number;
     genres: Genre[];
@@ -78,4 +72,34 @@ export interface LastFMBio {
     link: string;
     summary: string;
     content: string;
+}
+
+export interface MBGenre {
+    id: string;
+    name: string;
+}
+
+export interface Genre {
+    id: string;
+    name: string;
+    artistCount: number;
+    subgenre_of: MBGenre[];
+    influenced_genres: MBGenre[];
+    subgenres: MBGenre[];
+    fusion_genres: MBGenre[];
+    fusion_of: MBGenre[];
+    influenced_by: MBGenre[];
+}
+
+export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';
+
+export interface CacheResponse {
+    valid: CacheValidity,
+    data: ArtistJSON | GenresJSON | LastFMArtistJSON | MBGenre[] | null;
+}
+
+export interface SimpleGenre {
+    id: string;
+    name: string;
+    artistCount: number;
 }

@@ -1,6 +1,6 @@
 import {Genre, NodeLink} from "../types";
 
-export const createGenreLinks = (genres: Genre[]) => {
+export const genreLinksByName = (genres: Genre[]) => {
     const links: NodeLink[] = [];
     const linkKeys = new Set(); // for deduplication
     const genreNames = new Map(); // lowercased genre name → genre ID

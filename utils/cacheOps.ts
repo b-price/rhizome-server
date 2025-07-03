@@ -1,5 +1,5 @@
 import fs from "fs";
-import {ArtistJSON, GenresJSON, LastFMArtistJSON} from "../types";
+import {ArtistJSON, GenresJSON, CacheValidity, LastFMArtistJSON, CacheResponse, MBGenre} from "../types";
 
 export const ensureCacheDir = (cacheDir: string) => {
     try {
@@ -11,37 +11,38 @@ export const ensureCacheDir = (cacheDir: string) => {
     }
 };
 
-export const isCacheValid = (filePath: string, cacheDurationDays: number): boolean => {
+export const isCacheValid = (filePath: string, cacheDurationDays: number): CacheValidity => {
+    let cacheValidity: CacheValidity = 'notFound';
     try {
         if (!fs.existsSync(filePath)) {
-            return false;
+            return cacheValidity;
         }
-
 
         const stats = fs.statSync(filePath);
         const ageInDays = (Date.now() - stats.mtime.getTime()) / (1000 * 60 * 60 * 24);
-        return ageInDays < cacheDurationDays;
+        return ageInDays < cacheDurationDays ? 'valid' : 'stale';
     } catch (error) {
         console.error('Error checking cache validity:', error);
-        return false;
+        return 'error';
     }
 };
 
-export const loadFromCache = (filePath: string, cacheDurationDays: number): ArtistJSON | GenresJSON | LastFMArtistJSON | null => {
+export const loadFromCache = (filePath: string, cacheDurationDays: number): CacheResponse => {
     try {
-        if (!isCacheValid(filePath, cacheDurationDays)) {
-            return null;
+        const cacheValidity = isCacheValid(filePath, cacheDurationDays)
+        if (cacheValidity === 'notFound') {
+            return {valid: cacheValidity, data: null};
         }
 
         const data = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(data);
+        return {valid: cacheValidity, data: JSON.parse(data)};
     } catch (error) {
         console.error('Error loading from cache:', error);
-        return null;
+        return {valid: 'error', data: null};
     }
 };
 
-export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON | LastFMArtistJSON, cacheDir: string): void => {
+export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON | LastFMArtistJSON | MBGenre[], cacheDir: string): void => {
     try {
         ensureCacheDir(cacheDir);
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
