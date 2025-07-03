@@ -6,6 +6,7 @@ import {ArtistResponse, Genre, GenresJSON, MBGenre, NodeLink} from "../types";
 import {genreLinksByName} from "../utils/genreLinksByName";
 import {genreLinksByRelation} from "../utils/genreLinksByRelation";
 import {scrapeGenres} from "../utils/mbGenresScraper";
+import * as fs from 'fs';
 
 interface GenreResponse {
     'genre-count': number;
@@ -44,6 +45,7 @@ const fetchArtistsCount = async (genre: string): Promise<number> => {
 
 export const getAllGenres = async (): Promise<GenresJSON> => {
     const cacheFilePath = path.join(CACHE_DIR, 'allGenres.json');
+    const noArtistGenresFilePath = path.join(CACHE_DIR, 'noArtistGenres.json');
 
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
@@ -76,23 +78,38 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
         }
 
         // Check if we have stale cache data and if the genre list is the same
-        if (cachedData.valid === 'stale' && cachedData.data && "genres" in cachedData.data) {
-            const cachedGenreIds = new Set(cachedData.data.genres.map(g => g.id));
-            const currentGenreIds = new Set(allGenres.map(g => g.id));
+        if (cachedData.valid === 'stale' && cachedData.data && "genres" in cachedData.data && fs.existsSync(noArtistGenresFilePath)) {
+            // Load previously filtered out genres
+            let noArtistGenres: MBGenre[] = [];
+            try {
+                const noArtistGenresData = JSON.parse(fs.readFileSync(noArtistGenresFilePath, 'utf8'));
+                noArtistGenres = noArtistGenresData;
+            } catch (error) {
+                console.warn('Could not load noArtistGenres.json, proceeding without stale cache optimization');
+            }
 
-            // Check if the sets are identical
-            const sameGenres = cachedGenreIds.size === currentGenreIds.size &&
-                [...cachedGenreIds].every(id => currentGenreIds.has(id));
+            if (noArtistGenres.length > 0) {
+                // Combine cached genres with previously filtered out genres for comparison
+                const cachedGenreIds = new Set([
+                    ...cachedData.data.genres.map(g => g.id),
+                    ...noArtistGenres.map(g => g.id)
+                ]);
+                const currentGenreIds = new Set(allGenres.map(g => g.id));
 
-            if (sameGenres) {
-                console.log('Genre list unchanged, reusing stale cache data');
-                const reusedData: GenresJSON = {
-                    ...cachedData.data,
-                    date: new Date().toISOString()
-                };
-                saveToCache(cacheFilePath, reusedData, CACHE_DIR);
-                console.log('Stale cache data refreshed and saved');
-                return reusedData;
+                // Check if the sets are identical
+                const sameGenres = cachedGenreIds.size === currentGenreIds.size &&
+                    [...cachedGenreIds].every(id => currentGenreIds.has(id));
+
+                if (sameGenres) {
+                    console.log('Genre list unchanged, reusing stale cache data');
+                    const reusedData: GenresJSON = {
+                        ...cachedData.data,
+                        date: new Date().toISOString()
+                    };
+                    saveToCache(cacheFilePath, reusedData, CACHE_DIR);
+                    console.log('Stale cache data refreshed and saved');
+                    return reusedData;
+                }
             }
         }
 
@@ -102,8 +119,24 @@ export const getAllGenres = async (): Promise<GenresJSON> => {
                 .enqueue(() => fetchArtistsCount(`"${genre.name.replaceAll('&', '%26')}"`));
         }
 
-        // Filter out genres with no artists
+        // Filter out genres with no artists and save filtered out genres
         const filteredGenres = allGenres.filter(g => g.artistCount > FILTER_THRESHOLD);
+        const noArtistGenres = allGenres
+            .filter(g => g.artistCount <= FILTER_THRESHOLD)
+            .map(({ id, name }) => ({ id, name }));
+
+        // Save filtered out genres to separate file
+        if (noArtistGenres.length > 0) {
+            try {
+                if (!fs.existsSync(CACHE_DIR)) {
+                    fs.mkdirSync(CACHE_DIR, { recursive: true });
+                }
+                fs.writeFileSync(noArtistGenresFilePath, JSON.stringify(noArtistGenres, null, 2));
+                console.log(`Saved ${noArtistGenres.length} filtered out genres to noArtistGenres.json`);
+            } catch (error) {
+                console.warn('Could not save noArtistGenres.json:', error);
+            }
+        }
 
         // Scrape genre relations from MusicBrainz
         console.log('Scraping genre relations from MusicBrainz...');
