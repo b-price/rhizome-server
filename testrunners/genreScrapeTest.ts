@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { scrapeGenres } from './utils/mbGenresScraper';
+import { scrapeGenres } from '../utils/mbGenresScraper';
 
 interface SimpleGenre {
     id: string;

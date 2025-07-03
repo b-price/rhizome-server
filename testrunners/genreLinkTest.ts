@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { genreLinksByRelation } from './genreLinksByRelation';
-import {ensureCacheDir, saveToCache} from "./cacheOps";
+import { genreLinksByRelation } from '../utils/genreLinksByRelation';
+import {ensureCacheDir, saveToCache} from "../utils/cacheOps";
 
 interface GenreRelation {
     id: string;
