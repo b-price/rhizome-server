@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { genreLinksByRelation } from './genreLinksByRelation';
+import {ensureCacheDir, saveToCache} from "./cacheOps";
 
 interface GenreRelation {
     id: string;
@@ -93,7 +94,15 @@ function runGenreLinkTest() {
 
 // Run the test
 if (require.main === module) {
-    runGenreLinkTest();
+    const links = runGenreLinkTest();
+    const cacheDir = path.join(process.cwd(), 'data', 'genres');
+    const cacheFilePath = path.join(cacheDir, 'genreLinks.json')
+    try {
+        ensureCacheDir(cacheDir);
+        fs.writeFileSync(cacheFilePath, JSON.stringify(links, null, 2));
+    } catch (error) {
+        console.error('Error saving to cache:', error);
+    }
 }
 
 export { runGenreLinkTest };
