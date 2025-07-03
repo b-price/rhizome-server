@@ -1,5 +1,5 @@
 import fs from "fs";
-import {ArtistJSON, GenresJSON, CacheValidity, LastFMArtistJSON, CacheResponse} from "../types";
+import {ArtistJSON, GenresJSON, CacheValidity, LastFMArtistJSON, CacheResponse, MBGenre} from "../types";
 
 export const ensureCacheDir = (cacheDir: string) => {
     try {
@@ -42,7 +42,7 @@ export const loadFromCache = (filePath: string, cacheDurationDays: number): Cach
     }
 };
 
-export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON | LastFMArtistJSON, cacheDir: string): void => {
+export const saveToCache = (filePath: string, data: ArtistJSON | GenresJSON | LastFMArtistJSON | MBGenre[], cacheDir: string): void => {
     try {
         ensureCacheDir(cacheDir);
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));

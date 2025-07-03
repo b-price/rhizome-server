@@ -95,7 +95,7 @@ export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';
 
 export interface CacheResponse {
     valid: CacheValidity,
-    data: ArtistJSON | GenresJSON | LastFMArtistJSON | null;
+    data: ArtistJSON | GenresJSON | LastFMArtistJSON | MBGenre[] | null;
 }
 
 export interface SimpleGenre {
