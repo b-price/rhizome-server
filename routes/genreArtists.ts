@@ -2,6 +2,7 @@ import express from "express";
 import {getAllArtists} from "../controllers/artistFetcher";
 import {getArtistData} from "../controllers/lastfmArtistData";
 import {getArtistImage} from "../controllers/getArtistImage";
+import {lastFMArtistSearch} from "../controllers/lastFMArtistSearch";
 
 const router = express.Router();
 
@@ -33,6 +34,17 @@ router.get('/image/:id', async (req, res) => {
         console.error('Failed to fetch artist image:', err);
         res.status(500).json({ error: 'Failed to fetch artist image' });
     }
-})
+});
+
+router.get('/search/:name', async (req, res) => {
+    try {
+        console.log(req.params.name);
+        const artistsData = await lastFMArtistSearch(req.params.name);
+        res.json(artistsData);
+    } catch (err) {
+        console.error('Failed to search artists:', err);
+        res.status(500).json({ error: 'Failed to search artists' });
+    }
+});
 
 export default router;

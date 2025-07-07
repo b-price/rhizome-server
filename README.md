@@ -3,6 +3,8 @@
 - Retrieves every genre: `/genres`
 - Retrieves every artist in a genre and an array of artist links: `/artists/:genre`
 - Retrieves last.fm artist data for an artist: `/artists/data/:id/:name`
+- Retrieves associated wikimedia images for MB artist: `/artists/image/:id`
+- Search last.fm for an artist: `artists/search/:name`
 - **WARNING:** for decently popular genres, retrieving artists will take a LONG time
 - Try it out on obscure genres like "Ambient Black Metal" for faster results
 ### Source code setup

@@ -13,7 +13,7 @@ export const getArtistData = async (mbid: string, artistName: string) => {
 
     // Try to load from cache first
     const cachedData = loadFromCache(cacheFilePath, CACHE_DURATION_DAYS);
-    if (cachedData && "mbid" in cachedData) {
+    if (cachedData && "ontour" in cachedData) {
         console.log('Returning cached last.fm artist data');
         return cachedData;
     }
@@ -26,7 +26,7 @@ export const getArtistData = async (mbid: string, artistName: string) => {
         const data = res.data.artist;
         const artistData: LastFMArtistJSON = {
             name: data.name,
-            mbid: data.mbid,
+            id: data.mbid,
             ontour: parseInt(data.ontour) === 1,
             stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
             bio: {
@@ -49,13 +49,13 @@ export const getArtistData = async (mbid: string, artistName: string) => {
         try {
             const res = await axios.get(`${BASE_URL}artist=${encodeURIComponent(artistName)}${URL_CONFIG}`);
             const data = res.data.artist;
-            if (data && data.mbid && data.mbid !== mbid) {
-                console.log("MBID of returned artist exists and does not match artist")
-                throw mbidError;
-            }
+            // if (data && data.mbid && data.mbid !== mbid) {
+            //     console.log("MBID of returned artist exists and does not match artist")
+            //     throw mbidError;
+            // }
             const artistData: LastFMArtistJSON = {
                 name: data.name,
-                mbid: data.mbid,
+                id: data.mbid,
                 ontour: parseInt(data.ontour) === 1,
                 stats: {listeners: parseInt(data.stats.listeners), playcount: parseInt(data.stats.playcount)},
                 bio: {

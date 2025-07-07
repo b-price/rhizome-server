@@ -1,3 +1,8 @@
+export interface BasicItem {
+    id: string;
+    name: string;
+}
+
 export interface GenresJSON {
     count: number;
     genres: Genre[];
@@ -10,9 +15,7 @@ export interface Tag {
     count: number;
 }
 
-export interface Artist {
-    id: string;
-    name: string;
+export interface Artist extends BasicItem {
     tags: Tag[];
     location?: string;
     startDate?: string;
@@ -20,9 +23,7 @@ export interface Artist {
     image?: string;
 }
 
-interface ArtistData {
-    id: string;
-    name: string;
+interface ArtistData extends BasicItem {
     score: number;
     tags: Tag[];
     area: { name: string };
@@ -53,9 +54,7 @@ export interface NodeLink {
     target: string;
 }
 
-export interface LastFMArtistJSON {
-    name: string;
-    mbid: string;
+export interface LastFMArtistJSON extends BasicItem {
     ontour: boolean;
     stats: LastFMStats;
     bio: LastFMBio;
@@ -79,10 +78,7 @@ export interface MBGenre {
     name: string;
 }
 
-export interface Genre {
-    id: string;
-    name: string;
-    artistCount: number;
+export interface Genre extends SimpleGenre {
     subgenre_of: MBGenre[];
     influenced_genres: MBGenre[];
     subgenres: MBGenre[];
@@ -98,8 +94,10 @@ export interface CacheResponse {
     data: ArtistJSON | GenresJSON | LastFMArtistJSON | MBGenre[] | null;
 }
 
-export interface SimpleGenre {
-    id: string;
-    name: string;
+export interface SimpleGenre extends BasicItem {
     artistCount: number;
+}
+
+export interface LastFMSearchArtistData extends BasicItem {
+    listeners: number;
 }
