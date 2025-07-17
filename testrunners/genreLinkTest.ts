@@ -23,11 +23,11 @@ interface ExtendedGenre {
 function runGenreLinkTest() {
     try {
         // Read the genres from the JSON file
-        const filePath = path.join('../data/filtered_genres.json');
+        const filePath = path.join(__dirname, '..', 'data', 'genres', 'allGenres.json');
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const genres: ExtendedGenre[] = JSON.parse(fileContent);
+        const genres: ExtendedGenre[] = JSON.parse(fileContent).genres;
 
-        console.log(`Loaded ${genres.length} genres from filtered_genres.json`);
+        console.log(`Loaded ${genres.length} genres from allGenres.json`);
 
         // Measure performance
         const startTime = Date.now();

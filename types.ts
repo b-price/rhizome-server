@@ -52,6 +52,7 @@ export interface GenreArtistCountsJSON {
 export interface NodeLink {
     source: string;
     target: string;
+    linkType?: GenreClusterMode;
 }
 
 export interface LastFMArtistJSON extends BasicItem {
@@ -101,3 +102,5 @@ export interface SimpleGenre extends BasicItem {
 export interface LastFMSearchArtistData extends BasicItem {
     listeners: number;
 }
+
+export type GenreClusterMode = 'subgenre' | 'influence' | 'fusion';
