@@ -6,7 +6,7 @@ import {ArtistResponse, CacheResponse, Genre, GenresJSON, MBGenre} from "../type
 import {genreLinksByRelation} from "../utils/genreLinksByRelation";
 import {scrapeGenres} from "../utils/mbGenresScraper";
 
-interface GenreResponse {
+export interface GenreResponse {
     'genre-count': number;
     genres: MBGenre[];
 }

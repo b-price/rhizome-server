@@ -86,6 +86,9 @@ export interface Genre extends SimpleGenre {
     fusion_genres: MBGenre[];
     fusion_of: MBGenre[];
     influenced_by: MBGenre[];
+    from?: string[];
+    named_after_area?: string[];
+    used_instruments?: string[];
 }
 
 export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';

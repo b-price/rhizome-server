@@ -4,7 +4,7 @@ import {Genre, MBGenre, SimpleGenre} from '../types';
 const BASE_URL = "https://musicbrainz.org/genre/";
 const HEADERS = { "User-Agent": "GenreScraper/1.1 (example@example.com)" };
 
-const TARGET_ROWS: { [key: string]: GenreRelationKeys } = {
+const TARGET_ROWS_LINKS: { [key: string]: GenreRelationKeys } = {
     "subgenre of:": "subgenre_of",
     "subgenres:": "subgenres",
     "has fusion genres:": "fusion_genres",
@@ -13,13 +13,23 @@ const TARGET_ROWS: { [key: string]: GenreRelationKeys } = {
     "influenced genres:": "influenced_genres",
 };
 
+const TARGET_ROWS_OTHER: { [key: string]: GenreDataKeys } = {
+    "from:": "from",
+    "named after area:": "named_after_area",
+    "used instruments:": "used_instruments",
+};
+
 const UUID_RE = /\/genre\/([0-9a-f\-]{36})/i;
 
 type GenreRelationKeys = {
     [K in keyof Genre]: Genre[K] extends MBGenre[] ? K : never
 }[keyof Genre];
 
-function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>, genreIds: Set<string>): MBGenre[] {
+type GenreDataKeys = {
+    [K in keyof Genre]: K
+}[keyof Genre];
+
+function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>): MBGenre[] {
     const links: MBGenre[] = [];
 
     cell.find('a[href]').each((_, element) => {
@@ -29,16 +39,23 @@ function extractLinks($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>, genreId
         const match = UUID_RE.exec(href);
         if (match) {
             const genreId = match[1];
-            // Only include if the genre is in our input array
-            if (genreIds.has(genreId)) {
-                const bdi = $(element).find('bdi');
-                const name = bdi.length > 0 ? bdi.text().trim() : $(element).text().trim();
-                links.push({ id: genreId, name });
-            }
+            const bdi = $(element).find('bdi');
+            const name = bdi.length > 0 ? bdi.text().trim() : $(element).text().trim();
+            links.push({ id: genreId, name });
+
         }
     });
 
     return links;
+}
+
+function extractData($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>): string[] {
+    const data: string[] = [];
+    cell.find('bdi').each((_, element) => {
+        data.push($(element).text().trim());
+    });
+    console.log(data)
+    return data;
 }
 
 async function scrapeSingle(genre: SimpleGenre, genreIds: Set<string>): Promise<Genre> {
@@ -77,10 +94,15 @@ async function scrapeSingle(genre: SimpleGenre, genreIds: Set<string>): Promise<
             return emptyResult;
         }
 
-        const table = relationshipsH2.next('table.details');
+        const tables = [];
+        let table = relationshipsH2.next('table.details');
         if (table.length === 0) {
             console.warn(`Warning: No details table after relationships for ${genreId} – ${name}`);
             return emptyResult;
+        }
+        while (table.length > 0) {
+            tables.push(table);
+            table = table.next('table.details');
         }
 
         const result: Genre = {
@@ -93,20 +115,31 @@ async function scrapeSingle(genre: SimpleGenre, genreIds: Set<string>): Promise<
             fusion_of: [],
             influenced_by: [],
             influenced_genres: [],
+            from: [],
+            named_after_area: [],
+            used_instruments: [],
         };
 
-        table.find('tr').each((_, row) => {
-            const th = $(row).find('th');
-            const td = $(row).find('td');
+        for (const details of tables) {
+            details.find('tr').each((_, row) => {
+                const th = $(row).find('th');
+                const td = $(row).find('td');
 
-            if (th.length === 0 || td.length === 0) return;
+                if (th.length === 0 || td.length === 0) return;
 
-            const heading = th.text().trim().toLowerCase();
-            if (heading in TARGET_ROWS) {
-                const key = TARGET_ROWS[heading];
-                result[key] = extractLinks($, td, genreIds);
-            }
-        });
+                const heading = th.text().trim().toLowerCase();
+                if (heading in TARGET_ROWS_LINKS) {
+                    const key = TARGET_ROWS_LINKS[heading];
+                    if (key) result[key] = extractLinks($, td);
+                } else if (heading in TARGET_ROWS_OTHER) {
+                    const key = TARGET_ROWS_OTHER[heading];
+                    if (key) { // @ts-ignore
+                        result[key] = extractData($, td);
+                    }
+                }
+            });
+        }
+
 
         return result;
 

@@ -1,0 +1,1046 @@
+[
+  {
+    "id": "a40ac9d5-aa70-4901-8236-a6b23aa2b6a2",
+    "name": "izvorna bosanska muzika",
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [],
+    "from": [
+      "Bosnia and Herzegovina"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "aa068134-d667-4f9b-a7a2-07a5fafe51c1",
+    "name": "j-core",
+    "subgenre_of": [
+      {
+        "id": "3308d0b0-3c7f-45e2-b835-5c2a0d433f02",
+        "name": "hardcore techno"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [
+      {
+        "id": "ce119355-b6b5-40eb-adad-538a1f6a6ad4",
+        "name": "future core"
+      }
+    ],
+    "from": [
+      "Japan"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "eba7715e-ee26-4989-8d49-9db382955419",
+    "name": "j-pop",
+    "subgenre_of": [
+      {
+        "id": "911c7bbb-172d-4df8-9478-dbff4296e791",
+        "name": "pop"
+      }
+    ],
+    "subgenres": [
+      {
+        "id": "aebbce35-0e8b-40e9-b04c-bebbbda124d0",
+        "name": "akishibu-kei"
+      },
+      {
+        "id": "51d1862f-6f48-4660-8669-f3bb1bc06a15",
+        "name": "wa euro"
+      }
+    ],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "5fef47af-772b-48e2-8e49-855f7d999e81",
+        "name": "city pop"
+      },
+      {
+        "id": "52584862-36e0-405c-9d76-0e71cbc69f9a",
+        "name": "idol kayō"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "36f9bf8f-716a-4297-9bae-380b0a17b0f4",
+        "name": "denpa"
+      },
+      {
+        "id": "5319fada-431d-4b16-ac6f-37e24b2201b5",
+        "name": "kawaii metal"
+      }
+    ],
+    "from": [
+      "Japan"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "d181e978-c908-4f33-b2a2-f7454d0cb2c1",
+    "name": "j-rock",
+    "subgenre_of": [
+      {
+        "id": "ceeaa283-5d7b-4202-8d1d-e25d116b2a18",
+        "name": "alternative rock"
+      }
+    ],
+    "subgenres": [
+      {
+        "id": "d03d0c50-c6f4-4539-b18f-1ea0e75015ac",
+        "name": "yakousei"
+      }
+    ],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [],
+    "from": [
+      "Japan"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "d5c8b95a-fcf6-4c1d-b98c-a7cb4efb494f",
+    "name": "jackin house",
+    "subgenre_of": [
+      {
+        "id": "a2782cb6-1cd0-477c-a61d-b3f8b42dd1b3",
+        "name": "house"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "3976e9ba-16d0-461d-b732-99408a0374ba",
+        "name": "edm"
+      },
+      {
+        "id": "62e4c7cb-a2b3-462b-8d96-1b0d66ee6cf3",
+        "name": "funky house"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "01bf7fe6-48c6-4c17-be82-a8e06f5b451c",
+    "name": "jaipongan",
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "404a769d-cc30-431a-9ca9-1091cf0c833e",
+        "name": "gamelan"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "4d27f1f6-525f-4396-ac53-140136bba9a9",
+        "name": "kuda lumping"
+      }
+    ],
+    "from": [
+      "Indonesia"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "ee4c47d7-4afe-4410-ab3e-0100a204ec23",
+    "name": "jam band",
+    "subgenre_of": [
+      {
+        "id": "0e3fc579-2d24-4f20-9dae-736e1ec78798",
+        "name": "rock"
+      }
+    ],
+    "subgenres": [
+      {
+        "id": "cf7c6a4f-9e37-4dac-b0b7-fd70fced51a2",
+        "name": "livetronica"
+      }
+    ],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [
+      {
+        "id": "ea19b49c-4be4-49ec-9717-05e3576bdb1a",
+        "name": "jamgrass"
+      }
+    ],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "7494f032-cd4f-46af-8fb6-ebd7133b48f6",
+    "name": "jamaican ska",
+    "subgenre_of": [
+      {
+        "id": "65877068-2116-4af6-89a2-838179a7e103",
+        "name": "ska"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [],
+    "from": [
+      "Jamaica"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "b977e713-254b-40f8-9101-fc68e836809e",
+    "name": "james bay fiddling",
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "34edc6ac-d431-4b36-be15-ecd17533e5e2",
+        "name": "celtic"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [
+      "Canada"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "ea19b49c-4be4-49ec-9717-05e3576bdb1a",
+    "name": "jamgrass",
+    "subgenre_of": [
+      {
+        "id": "b67e5475-9b31-4772-bc2c-30ed0823a1b7",
+        "name": "progressive bluegrass"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "ee4c47d7-4afe-4410-ab3e-0100a204ec23",
+        "name": "jam band"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "6c207307-cac0-43cf-be8f-e2dde68a92f1",
+    "name": "jangle pop",
+    "subgenre_of": [
+      {
+        "id": "797e2e85-5ffd-495c-a757-8b4079052f0e",
+        "name": "pop rock"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "445dc48f-5233-4b4f-987f-867ff9ade836",
+        "name": "folk rock"
+      },
+      {
+        "id": "618704fc-daac-44a2-92c9-89e3b1a2fc8c",
+        "name": "power pop"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "17cee13b-8725-43d1-a52a-6786933c0166",
+        "name": "c86"
+      },
+      {
+        "id": "013161b9-3f21-468f-aa1f-28adf1eae085",
+        "name": "madchester"
+      },
+      {
+        "id": "6793f60d-be5e-4968-8428-9f7855218414",
+        "name": "neo-acoustic"
+      },
+      {
+        "id": "77f67575-46ed-4447-afc1-ebcd2ab36b66",
+        "name": "paisley underground"
+      }
+    ],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "9a8b5ca4-6a47-4ede-8c6f-90ce1ce3d2bd",
+    "name": "japanese classical",
+    "subgenre_of": [
+      {
+        "id": "6ed4e4d1-9a97-4e2c-b8df-083754f154f4",
+        "name": "classical"
+      }
+    ],
+    "subgenres": [
+      {
+        "id": "07b217fc-7798-4e74-aad6-2c08b32c2810",
+        "name": "gagaku"
+      },
+      {
+        "id": "6e8856fb-0a15-4351-ad74-7a1d4cbe7211",
+        "name": "heikyoku"
+      },
+      {
+        "id": "bfc4294e-6815-4664-a176-8083e5e47e91",
+        "name": "honkyoku"
+      },
+      {
+        "id": "5c9bb85f-55df-4731-91b7-05df7c16d0ca",
+        "name": "jiuta"
+      },
+      {
+        "id": "ebbbccc1-4aaf-40ac-9dc1-99e42b621988",
+        "name": "jōruri"
+      },
+      {
+        "id": "732422d2-a6c6-4e97-88a9-8bb9929eec09",
+        "name": "meiji shinkyoku"
+      },
+      {
+        "id": "db22cff9-df8e-4a6a-83f2-a8093bf6c488",
+        "name": "nagauta"
+      },
+      {
+        "id": "bb59451e-9d55-49ea-a555-8e2a1a6d5ae1",
+        "name": "noh"
+      },
+      {
+        "id": "66d59e9f-d88e-4cf1-9e4f-8b6d448d0aff",
+        "name": "shōmyō"
+      },
+      {
+        "id": "c9a21345-203f-4752-9fc9-a23b16e6fdc6",
+        "name": "sōkyoku"
+      }
+    ],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [],
+    "from": [
+      "Japan"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "40fcf9c3-4dc0-48e4-9823-cb3abcf64e85",
+    "name": "javanese gamelan",
+    "subgenre_of": [
+      {
+        "id": "404a769d-cc30-431a-9ca9-1091cf0c833e",
+        "name": "gamelan"
+      }
+    ],
+    "subgenres": [
+      {
+        "id": "a1bb925b-131e-4b39-826b-73f3d0ce4ce4",
+        "name": "gamelan salendro"
+      },
+      {
+        "id": "0255f4d0-a363-4d82-aba1-edbf7545c711",
+        "name": "gamelan sekaten"
+      },
+      {
+        "id": "4f5a0f77-941a-44d4-9f2a-583db87c33cb",
+        "name": "gamelan siteran"
+      },
+      {
+        "id": "8f000b70-83c3-4c87-89dd-cb8f97e11e0c",
+        "name": "gamelan surakarta"
+      }
+    ],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [
+      {
+        "id": "0876e225-4409-4007-992b-6d0e1d32fece",
+        "name": "langgam jawa"
+      }
+    ],
+    "from": [
+      "Indonesia"
+    ],
+    "named_after_area": [],
+    "used_instruments": [
+      "keplok"
+    ]
+  },
+  {
+    "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+    "name": "jazz",
+    "subgenre_of": [],
+    "subgenres": [
+      {
+        "id": "6f33d775-b4e2-473c-a7db-e34c525cc52d",
+        "name": "afro-jazz"
+      },
+      {
+        "id": "8d901306-d4a3-436c-a1c3-75550e5b6eaf",
+        "name": "avant-garde jazz"
+      },
+      {
+        "id": "ac30756b-55a7-4dc3-8908-8f94c93318d0",
+        "name": "bebop"
+      },
+      {
+        "id": "e7bb9a21-9556-4b85-bc78-5f69a3d0577d",
+        "name": "big band"
+      },
+      {
+        "id": "6719a210-ca19-4932-b392-83e93283296d",
+        "name": "cape jazz"
+      },
+      {
+        "id": "f0e90b41-4499-493f-b6e3-05d3c3ea1b20",
+        "name": "classic jazz"
+      },
+      {
+        "id": "e2b06d21-13df-4a48-aa81-6ddd99344dc7",
+        "name": "contemporary jazz"
+      },
+      {
+        "id": "5fc86669-d9ba-4716-8090-eff39081090e",
+        "name": "cool jazz"
+      },
+      {
+        "id": "cf64f76d-35a1-4d15-93a2-9ead67f67da7",
+        "name": "crime jazz"
+      },
+      {
+        "id": "af1040cf-d8bc-432f-a250-52bd287f92ac",
+        "name": "crossover jazz"
+      },
+      {
+        "id": "fd7b5582-e69c-40ad-90b1-d31db33be612",
+        "name": "dark jazz"
+      },
+      {
+        "id": "a5a946eb-e068-42d5-bf17-cb73bfc6c192",
+        "name": "dixieland"
+      },
+      {
+        "id": "cc5916e9-4832-453e-88a8-ae0a52434395",
+        "name": "ethio-jazz"
+      },
+      {
+        "id": "3c31635b-a5a7-44eb-ab9d-4bbde11da2d4",
+        "name": "free jazz"
+      },
+      {
+        "id": "f9f0bdd7-47aa-447a-80a9-578655bf721b",
+        "name": "gypsy jazz"
+      },
+      {
+        "id": "8c083468-2dce-4a31-ae77-433af3deafd3",
+        "name": "hard bop"
+      },
+      {
+        "id": "ecca1642-82e6-4118-b0c4-c794ebda9995",
+        "name": "indo jazz"
+      },
+      {
+        "id": "c1a4860e-720f-4f4c-8a54-a8032aac08fa",
+        "name": "instrumental jazz"
+      },
+      {
+        "id": "2377ff19-83e7-4873-b425-dce6d1ad4ef4",
+        "name": "jazz fusion"
+      },
+      {
+        "id": "f3c43ae8-839a-4523-b295-cfa4eba6c911",
+        "name": "jazz-funk"
+      },
+      {
+        "id": "49f0addb-4ed8-4f27-b40a-d98f067939f2",
+        "name": "kréyol djaz"
+      },
+      {
+        "id": "48095aaf-c31d-4bfc-9578-8755c71d44af",
+        "name": "latin jazz"
+      },
+      {
+        "id": "f7867ec2-4d4a-4241-9c39-21ac1860f0ec",
+        "name": "marabi"
+      },
+      {
+        "id": "ff60b411-27db-4bd3-a444-3afe92cbfa7e",
+        "name": "modal jazz"
+      },
+      {
+        "id": "c8aa5344-6063-41b6-bf18-ac9867f50fa1",
+        "name": "modern creative"
+      },
+      {
+        "id": "750f89f0-3a9b-4c15-96fd-899cc4e421c8",
+        "name": "orchestral jazz"
+      },
+      {
+        "id": "94ce0ba0-9043-4b5b-87d6-3c1a8458f75d",
+        "name": "post-bop"
+      },
+      {
+        "id": "a1f1dcc8-6078-4c12-90b7-47e3080e330c",
+        "name": "smooth jazz"
+      },
+      {
+        "id": "e70f0aa3-9531-448c-8182-7ff34e3d74f8",
+        "name": "soul jazz"
+      },
+      {
+        "id": "b37ceb94-0e7b-4d60-bcb1-662148b75a92",
+        "name": "spiritual jazz"
+      },
+      {
+        "id": "b5313d5a-f910-4fa8-a31c-0152897ed840",
+        "name": "stride"
+      },
+      {
+        "id": "063d0461-1e12-4246-87bf-69c5ca611cc2",
+        "name": "swing"
+      },
+      {
+        "id": "782dc157-d1a5-42b9-9174-d329c24a7ef3",
+        "name": "vocal jazz"
+      }
+    ],
+    "fusion_genres": [
+      {
+        "id": "7dc2b20f-3953-4874-b9bf-41b8ba06d20c",
+        "name": "acid jazz"
+      },
+      {
+        "id": "fcc58a18-9326-4c92-8b29-c294d44379c3",
+        "name": "afrobeat"
+      },
+      {
+        "id": "e195386e-6140-4b20-be18-4fbe4fd6ea5a",
+        "name": "boogaloo"
+      },
+      {
+        "id": "93ebcf80-bbe0-4e0d-ba0c-0591df462d91",
+        "name": "flamenco jazz"
+      },
+      {
+        "id": "9702d99a-823f-47ba-b8c2-af0538c9640b",
+        "name": "jazz blues"
+      },
+      {
+        "id": "b79b9937-5cb9-418d-a0c4-63192689f4ae",
+        "name": "samba-jazz"
+      },
+      {
+        "id": "b73c3b2a-45ba-44e6-a863-0fe6073181c3",
+        "name": "third stream"
+      },
+      {
+        "id": "7af339eb-e666-4aa6-a6ca-8444ca573fe0",
+        "name": "world fusion"
+      }
+    ],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "fe12b346-a10e-450f-bf81-fa20894b5ea2",
+        "name": "blues"
+      },
+      {
+        "id": "d017dd87-704b-4ad4-8b67-39fb401b8339",
+        "name": "ragtime"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "573a284f-2ae3-4636-af36-10fc1078d295",
+        "name": "bossa nova"
+      },
+      {
+        "id": "cbb6cb49-6671-46ba-8d35-c5f703d881a3",
+        "name": "compas"
+      },
+      {
+        "id": "c1e6e9ef-0ca6-4bf0-a0ad-a45dcacf6c5f",
+        "name": "digital fusion"
+      },
+      {
+        "id": "567040ee-90a1-4da9-9697-f49e31603898",
+        "name": "electric texas blues"
+      },
+      {
+        "id": "fe4ba6a1-9873-4fd0-a12b-a70c81818514",
+        "name": "funk"
+      },
+      {
+        "id": "27720af4-dc09-42b5-b0bb-39cf7b51fd36",
+        "name": "hapa haole"
+      },
+      {
+        "id": "998ab3d6-b975-45c0-948e-412b1e72bc58",
+        "name": "humppa"
+      },
+      {
+        "id": "d4e8be24-8e70-4d64-bbc7-3ae7efd96266",
+        "name": "jazz guachaca"
+      },
+      {
+        "id": "1ece3afe-bbff-4408-8e45-b20ca45fe9ae",
+        "name": "jazz house"
+      },
+      {
+        "id": "d690e28c-828d-4011-ad0e-b157a222597e",
+        "name": "jazz poetry"
+      },
+      {
+        "id": "c88a8b97-ba4b-4d45-916f-4c4a779ccd89",
+        "name": "jazz pop"
+      },
+      {
+        "id": "6061fb1b-d733-4643-a3d4-940c9a5e2ab8",
+        "name": "jazz rap"
+      },
+      {
+        "id": "5eea976c-1ab2-4d94-9b63-7d1297d5dba5",
+        "name": "jazz rock"
+      },
+      {
+        "id": "6294b8c8-42d7-4f32-a888-1d77acce495a",
+        "name": "jazzstep"
+      },
+      {
+        "id": "e889e516-07ac-4a51-a958-d51bbb5b3a8f",
+        "name": "kwela"
+      },
+      {
+        "id": "de2785b2-f282-4718-a422-37dc93964bdd",
+        "name": "lounge"
+      },
+      {
+        "id": "fe3ac8f4-a9cb-4ad7-801e-6d1a69b1a380",
+        "name": "makossa"
+      },
+      {
+        "id": "f5ce6b81-b277-4a23-ba23-2e1e2a7e51ac",
+        "name": "mod"
+      },
+      {
+        "id": "905cbc3e-31cb-40c0-bc3c-bee506e1a4a8",
+        "name": "mood kayō"
+      },
+      {
+        "id": "a78fa973-0554-40d7-a361-270974a2cd22",
+        "name": "muziki wa dansi"
+      },
+      {
+        "id": "126b5875-8fe4-4e0f-b33a-580aacf40601",
+        "name": "new orleans blues"
+      },
+      {
+        "id": "848ecccf-e7fa-4439-a8ab-9dd3c31b4cf6",
+        "name": "nu jazz"
+      },
+      {
+        "id": "57ab94f1-8407-45d5-a9d4-16c339bd86f0",
+        "name": "nuevo flamenco"
+      },
+      {
+        "id": "62449ed2-795f-46e8-91ca-09f56922a7a8",
+        "name": "nuevo tango"
+      },
+      {
+        "id": "9683a907-3755-45a0-b671-0e7e4502f4d2",
+        "name": "onda nueva"
+      },
+      {
+        "id": "130790af-ee2d-478f-a02a-f8c1b999e23c",
+        "name": "pluggnb"
+      },
+      {
+        "id": "435ca3eb-0191-48d7-97ca-d45ba7b0f915",
+        "name": "post-minimalism"
+      },
+      {
+        "id": "0bfffa19-4e4a-4bf7-bf53-6ec44f0a2f8e",
+        "name": "post-rock"
+      },
+      {
+        "id": "b67e5475-9b31-4772-bc2c-30ed0823a1b7",
+        "name": "progressive bluegrass"
+      },
+      {
+        "id": "ae9b8279-3959-48d8-8a88-741a7f6d4a48",
+        "name": "progressive rock"
+      },
+      {
+        "id": "33a31cc3-6339-4166-bec4-e5cba3fe6ab9",
+        "name": "qaraami"
+      },
+      {
+        "id": "3e67417c-f58d-43dc-a696-9b889b24641a",
+        "name": "rhumba"
+      },
+      {
+        "id": "185d3df1-4d9a-4109-8501-f86babc85860",
+        "name": "sambalanço"
+      },
+      {
+        "id": "b1611387-c581-41a4-acba-48889758c7c5",
+        "name": "shidaiqu"
+      },
+      {
+        "id": "9322a638-95ba-467c-992d-d1e641e8ee9a",
+        "name": "skiffle"
+      },
+      {
+        "id": "c1af7cc0-44e4-484a-b5b7-89d068944c24",
+        "name": "songo"
+      },
+      {
+        "id": "d13290c7-581a-4aa7-85ad-450b35261bf8",
+        "name": "sophisti-pop"
+      },
+      {
+        "id": "6a579e9e-69ae-42ce-ad7d-d16baaec8255",
+        "name": "texas blues"
+      },
+      {
+        "id": "059a4b6f-4195-4d34-b09f-31923c555368",
+        "name": "tradi-moderne ivoirien"
+      },
+      {
+        "id": "6992b6b1-c275-4728-89b0-8aebab5b7d94",
+        "name": "zeuhl"
+      },
+      {
+        "id": "498229df-4956-4ed7-91f7-a9d4b1877af1",
+        "name": "zydeco"
+      }
+    ],
+    "from": [
+      "United States"
+    ],
+    "named_after_area": [],
+    "used_instruments": [
+      "drums (drum set)",
+      "Set of drums in modern music",
+      "electric bass guitar"
+    ]
+  },
+  {
+    "id": "9702d99a-823f-47ba-b8c2-af0538c9640b",
+    "name": "jazz blues",
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [
+      {
+        "id": "fe12b346-a10e-450f-bf81-fa20894b5ea2",
+        "name": "blues"
+      },
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_by": [],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "2377ff19-83e7-4873-b425-dce6d1ad4ef4",
+    "name": "jazz fusion",
+    "subgenre_of": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [],
+    "influenced_genres": [
+      {
+        "id": "9c2f8b08-9bac-4bfd-b9ed-6381c65791e9",
+        "name": "canterbury scene"
+      },
+      {
+        "id": "a1f1dcc8-6078-4c12-90b7-47e3080e330c",
+        "name": "smooth jazz"
+      }
+    ],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "d4e8be24-8e70-4d64-bbc7-3ae7efd96266",
+    "name": "jazz guachaca",
+    "subgenre_of": [],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "49fa872d-561c-4f8a-aea4-fbe7f67e1bd6",
+        "name": "bolero"
+      },
+      {
+        "id": "d60ef35c-e367-4272-9b25-e3f2ecebb2aa",
+        "name": "corrido"
+      },
+      {
+        "id": "6edf2509-18f5-469d-beb2-3ae8ef0645e2",
+        "name": "cueca"
+      },
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      },
+      {
+        "id": "267b14aa-3e3c-4615-803c-0255a81c8203",
+        "name": "tango"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [
+      "Chile"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "1ece3afe-bbff-4408-8e45-b20ca45fe9ae",
+    "name": "jazz house",
+    "subgenre_of": [
+      {
+        "id": "a2782cb6-1cd0-477c-a61d-b3f8b42dd1b3",
+        "name": "house"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "0a84c545-a3c8-458a-b834-9556334d7287",
+    "name": "jazz mugham",
+    "subgenre_of": [
+      {
+        "id": "ff60b411-27db-4bd3-a444-3afe92cbfa7e",
+        "name": "modal jazz"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "94338c63-5167-4e6b-ad36-38cbaca22583",
+        "name": "mugham"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [
+      "Azerbaijan"
+    ],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "d690e28c-828d-4011-ad0e-b157a222597e",
+    "name": "jazz poetry",
+    "subgenre_of": [
+      {
+        "id": "15570d3c-756e-429e-ad67-653cb29ae886",
+        "name": "poetry"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "c88a8b97-ba4b-4d45-916f-4c4a779ccd89",
+    "name": "jazz pop",
+    "subgenre_of": [
+      {
+        "id": "911c7bbb-172d-4df8-9478-dbff4296e791",
+        "name": "pop"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "6061fb1b-d733-4643-a3d4-940c9a5e2ab8",
+    "name": "jazz rap",
+    "subgenre_of": [
+      {
+        "id": "52faa157-6bad-4d86-a0ab-d4dec7d2513c",
+        "name": "hip hop"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "5eea976c-1ab2-4d94-9b63-7d1297d5dba5",
+    "name": "jazz rock",
+    "subgenre_of": [
+      {
+        "id": "0e3fc579-2d24-4f20-9dae-736e1ec78798",
+        "name": "rock"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "9c2f8b08-9bac-4bfd-b9ed-6381c65791e9",
+        "name": "canterbury scene"
+      }
+    ],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "f3c43ae8-839a-4523-b295-cfa4eba6c911",
+    "name": "jazz-funk",
+    "subgenre_of": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "fe4ba6a1-9873-4fd0-a12b-a70c81818514",
+        "name": "funk"
+      }
+    ],
+    "influenced_genres": [],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  },
+  {
+    "id": "6294b8c8-42d7-4f32-a888-1d77acce495a",
+    "name": "jazzstep",
+    "subgenre_of": [
+      {
+        "id": "462f9321-6103-49c9-b6db-96219bce6f62",
+        "name": "drum and bass"
+      }
+    ],
+    "subgenres": [],
+    "fusion_genres": [],
+    "fusion_of": [],
+    "influenced_by": [
+      {
+        "id": "a715278f-1580-409f-8078-4ffbc800e08b",
+        "name": "jazz"
+      }
+    ],
+    "influenced_genres": [
+      {
+        "id": "f1eaf2fd-46de-4ee3-81b8-5c064a33ce82",
+        "name": "liquid funk"
+      }
+    ],
+    "from": [],
+    "named_after_area": [],
+    "used_instruments": []
+  }
+]
