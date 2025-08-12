@@ -7,6 +7,7 @@ import {createArtistLinks} from "../utils/createArtistLinks";
 import {saveToCache} from "../utils/cacheOps";
 import {getArtistImage} from "../controllers/getArtistImage";
 import {scrapeGenres, scrapeSingle} from "../utils/mbGenresScraper";
+import {wikiScrape} from "../utils/wikiScrape";
 
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const GENRES_URL = `${process.env.MB_URL}genre/all`;
@@ -193,13 +194,15 @@ async function main() {
 
         for (const genre of mbGenres) {
             const scrapedData = await scrapeSingle(genre, genreIds);
+            const description = await wikiScrape(genre.name);
             const artistData = await getArtistsInGenre(genre.id, genre.name);
-            //todo: description scrape
+
             const genreData = {
                 ...scrapedData,
                 artistCount: artistData.totalArtists,
                 totalListeners: artistData.totalListeners,
                 totalPlays: artistData.totalPlays,
+                description: description,
             }
             allGenres.push(genreData);
         }
