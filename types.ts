@@ -23,7 +23,7 @@ export interface Artist extends BasicItem {
     image?: string;
 }
 
-interface ArtistData extends BasicItem {
+export interface ArtistData extends BasicItem {
     score: number;
     tags: Tag[];
     area: { name: string };

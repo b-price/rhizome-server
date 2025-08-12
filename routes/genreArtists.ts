@@ -29,7 +29,7 @@ router.get('/data/:id/:name', async (req, res) => {
 
 router.get('/image/:id', async (req, res) => {
     try {
-        const image = await getArtistImage(req.params.id);
+        const image = await getArtistImage(req.params.id, req.params.id); // hack, should pass name
         res.json(image);
     } catch (err) {
         console.error('Failed to fetch artist image:', err);

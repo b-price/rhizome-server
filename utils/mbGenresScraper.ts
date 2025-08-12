@@ -58,7 +58,7 @@ function extractData($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>): string[
     return data;
 }
 
-async function scrapeSingle(genre: SimpleGenre, genreIds: Set<string>): Promise<Genre> {
+export async function scrapeSingle(genre: SimpleGenre, genreIds: Set<string>): Promise<Genre> {
     const { id: genreId, name, artistCount } = genre;
     const url = `${BASE_URL}${genreId}`;
 
