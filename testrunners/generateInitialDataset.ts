@@ -1,13 +1,14 @@
 import path from "path";
 import axios from "axios";
-import {Artist, ArtistData, ArtistJSON, ArtistResponse, Genre} from "../types";
+import {Artist, ArtistData, ArtistJSON, ArtistResponse, Genre, MBGenre} from "../types";
 import throttleQueue from "../utils/throttleQueue";
-import {fetchGenres, GenreResponse} from "../controllers/genreFetcher";
-import {createArtistLinks} from "../utils/createArtistLinks";
-import {saveToCache} from "../utils/cacheOps";
+import { GenreResponse} from "../controllers/genreFetcher";
 import {getArtistImage} from "../controllers/getArtistImage";
 import {scrapeGenres, scrapeSingle} from "../utils/mbGenresScraper";
 import {wikiScrape} from "../utils/wikiScrape";
+import {getAIGenreDesc} from "../utils/geminiRequests";
+import {ObjectId} from "mongodb";
+import {collections} from "../db/connection";
 
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const GENRES_URL = `${process.env.MB_URL}genre/all`;
@@ -22,6 +23,22 @@ const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
 const CACHE_DURATION_DAYS = 120;
 const FILTER_THRESHOLD = 0;
 
+async function updateArtist(oldID: ObjectId, genreID: string, oldGenres: string[]) {
+    if (!oldGenres.includes(genreID)) {
+        await collections.artists?.updateOne({ _id: oldID }, { $set: { genres: [...oldGenres, genreID] } });
+    }
+}
+
+const fetchGenres = async (limit: number, offset: number): Promise<MBGenre[]> => {
+    const res = await axios.get<GenreResponse>(`${GENRES_URL}?limit=${limit}&offset=${offset}`, {
+        headers: {
+            'User-Agent': USER_AGENT,
+            'Accept': 'application/json',
+        },
+    });
+    return res.data.genres.map(({ id, name }) => ({ id, name }));
+};
+
 async function lastfmArtistsFetch(limit: number, page: number, genre: string, genreID: string) {
     let totalListeners = 0;
     let totalPlays = 0;
@@ -29,32 +46,79 @@ async function lastfmArtistsFetch(limit: number, page: number, genre: string, ge
     const res = await axios.get(`${LASTFM_TAG_URL}${genre}${URL_CONFIG}&limit=${limit}&page=${page}`);
     const artists = [];
     for (const artist of res.data.topartists.artist) {
+        console.log(artist.name);
         let mbid = artist.mbid;
+        console.log(mbid);
         if (mbid) {
-            const mbData = await axios.get(`${ARTISTS_URL}/${mbid}`, {
+            const mbData = await throttleQueue.enqueue(() => axios.get(`${ARTISTS_URL}/${mbid}`, {
                 headers: {
                     'User-Agent': USER_AGENT,
                     'Accept': 'application/json',
                 },
-            });
-            const artistData = await singleArtistFetch(mbData, genreID);
-            artists.push(artistData);
-            totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
-            totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
-            totalArtists += 1;
-        } else {
-            const mbData = await axios.get(`${ARTISTS_URL}?query=artist:${artist.name}`, {
-                headers: {
-                    'User-Agent': USER_AGENT,
-                    'Accept': 'application/json',
-                },
-            });
-            if (mbData && mbData.data.artists[0].tags.map(t => t.name).includes(genre)) {
-                const artistData = await singleArtistFetch(mbData, genreID);
+            }));
+            const oldArtist = await collections.artists?.findOne({ id: mbid });
+            if (oldArtist) {
+                await updateArtist(oldArtist._id, genreID, oldArtist.genres);
+                totalListeners = oldArtist.listeners ? totalListeners + oldArtist.listeners : totalListeners;
+                totalPlays = oldArtist.playcount ? totalPlays + oldArtist.playcount : totalPlays;
+                totalArtists += 1;
+            } else {
+                const artistData = await singleArtistFetch(mbData.data, genreID);
                 artists.push(artistData);
                 totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
                 totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
                 totalArtists += 1;
+            }
+        } else {
+            if (artist.name) {
+                const mbRes = await throttleQueue.enqueue(() => axios.get(`${ARTISTS_URL}?query=artist:"${artist.name}"`, {
+                    headers: {
+                        'User-Agent': USER_AGENT,
+                        'Accept': 'application/json',
+                    },
+                }));
+                const mbData = mbRes.data.artists[0];
+                if (mbData && mbRes.data.artists.length > 0) {
+                    const oldArtist = await collections.artists?.findOne({ id: mbid });
+                    if (oldArtist) {
+                        await updateArtist(oldArtist._id, genreID, oldArtist.genres);
+                        totalListeners = oldArtist.listeners ? totalListeners + oldArtist.listeners : totalListeners;
+                        totalPlays = oldArtist.playcount ? totalPlays + oldArtist.playcount : totalPlays;
+                        totalArtists += 1;
+                    } else {
+                        const artistData = await singleArtistFetch(mbData, genreID);
+                        artists.push(artistData);
+                        totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
+                        totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
+                        totalArtists += 1;
+                    }
+                } else {
+                    console.log(`No MB data found for ${artist.name}`);
+                    const dummyMBID = `no-mbid-${artist.name}`;
+                    const oldArtist = await collections.artists?.findOne({ id: dummyMBID });
+                    if (oldArtist) {
+                        await updateArtist(oldArtist._id, genreID, oldArtist.genres);
+                        totalListeners = oldArtist.listeners ? totalListeners + oldArtist.listeners : totalListeners;
+                        totalPlays = oldArtist.playcount ? totalPlays + oldArtist.playcount : totalPlays;
+                        totalArtists += 1;
+                    } else {
+                        const dummyMbData = {
+                            id: dummyMBID,
+                            name: artist.name,
+                            tags: [{count: 10, name: genre}],
+                            genres: [genreID],
+                            "life-span": {begin: '', end: ''},
+                            score: 100,
+                            area: {name: ''},
+                            relations: []
+                        }
+                        const artistData = await singleArtistFetch(dummyMbData, genreID);
+                        artists.push(artistData);
+                        totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
+                        totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
+                        totalArtists += 1;
+                    }
+                }
             } else {
                 console.log(`No data found for ${artist.name}`);
             }
@@ -64,21 +128,27 @@ async function lastfmArtistsFetch(limit: number, page: number, genre: string, ge
 }
 
 async function singleArtistFetch(artist: ArtistData, genreID: string) {
+    const noMBID = artist.id.includes('no-mbid');
     let lastFMData;
     let imageURL;
     try {
         lastFMData = await axios.get(`${LASTFM_URL}mbid=${artist.id}${URL_CONFIG}`);
-    } catch (mbidError) {
-        try {
+        if ('error' in lastFMData.data) {
             console.log(`MBID query failed for ${artist.id}, attempting to fetch by artist name: ${artist.name}`);
             lastFMData = await axios.get(`${LASTFM_URL}artist=${artist.name}${URL_CONFIG}`);
-        } catch (nameError) {
-            console.log(`No last.fm data found for ${artist.name}`);
+            if ('error' in lastFMData.data) {
+                console.log(`No last.fm data found for ${artist.name}`);
+            }
         }
+    } catch (mbidError) {
+        console.error(`Error fetching last.fm data: ${mbidError}`);
     } finally {
-        imageURL = await getArtistImage(artist.id, artist.name);
+        if (!noMBID) {
+            console.log(`Fetching image for ${artist.name}...`);
+            imageURL = await getArtistImage(artist.id, artist.name);
+        }
     }
-    return {
+    const mbArtistData = {
         id: artist.id,
         name: artist.name,
         tags: artist.tags,
@@ -86,39 +156,66 @@ async function singleArtistFetch(artist: ArtistData, genreID: string) {
         location: artist.area ? artist.area.name : undefined,
         startDate: artist["life-span"].begin,
         endDate: artist["life-span"].end,
-        lastFMmbid: !!lastFMData,
-        listeners: lastFMData ? parseInt(lastFMData.data.artist.stats.listeners) : undefined,
-        playcount: lastFMData ? parseInt(lastFMData.data.artist.stats.playcount) : undefined,
-        bio: lastFMData ? {
-            link: lastFMData.data.artist.bio.links.link.href,
-            summary: lastFMData.data.artist.bio.summary.replaceAll(/<.*>/g, ''),
-            content: lastFMData.data.artist.bio.content.replaceAll(/<.*>/g, '')
-        } : undefined,
-        similar: lastFMData ? lastFMData.data.artist.similar.artist.map((a: {
-            name: string
-        }) => a.name) : undefined,
-        image: imageURL,
+        noMBID,
     }
+    const lfmArtistData = lastFMData && lastFMData.data.artist ? {
+            listeners: lastFMData.data.artist.stats ? parseInt(lastFMData.data.artist.stats.listeners) : undefined,
+            playcount: lastFMData.data.artist.stats ? parseInt(lastFMData.data.artist.stats.playcount) : undefined,
+            bio: {
+                link: lastFMData.data.artist.bio.links.link.href,
+                summary: lastFMData.data.artist.bio.summary.replaceAll(/<.*>/g, '').replaceAll(/\[.*]/g, ''),
+                content: lastFMData.data.artist.bio.content.replaceAll(/<.*>/g, '').replaceAll(/\[.*]/g, '').split('User-contributed text')[0],
+            },
+            similar: lastFMData.data.artist.similar.artist.map((a: {
+                name: string
+            }) => a.name),
+        } : {
+            listeners: undefined,
+            playcount: undefined,
+            bio: {
+                link: undefined,
+                summary: undefined,
+                content: undefined,
+            },
+            similar: [],
+    }
+    const finalArtistData = {
+        ...mbArtistData,
+        ...lfmArtistData,
+        image: imageURL,
+    };
+    await collections.artists?.insertOne(finalArtistData);
+    
+    return finalArtistData;
 }
 
 async function mbArtistsFetch(limit: number, offset: number, genre: string, genreID: string) {
     let totalListeners = 0;
     let totalPlays = 0;
     let totalArtists = 0;
-    const res = await axios.get<ArtistResponse>(`${ARTISTS_URL}?query=tag:${genre}&limit=${limit}&offset=${offset}`, {
+    const res = await throttleQueue.enqueue(() => axios.get<ArtistResponse>(`${ARTISTS_URL}?query=tag:"${genre}"&limit=${limit}&offset=${offset}`, {
         headers: {
             'User-Agent': USER_AGENT,
             'Accept': 'application/json',
         },
-    });
+    }));
     const artists = [];
     for (const artist of res.data.artists) {
-        const artistData = await singleArtistFetch(artist, genreID);
-        if (artistData) {
-            artists.push(artistData);
-            totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
-            totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
+        const oldArtist = await collections.artists?.findOne({ id: artist.id });
+        if (oldArtist) {
+            await updateArtist(oldArtist._id, genreID, oldArtist.genres);
+            totalListeners = oldArtist.listeners ? totalListeners + oldArtist.listeners : totalListeners;
+            totalPlays = oldArtist.playcount ? totalPlays + oldArtist.playcount : totalPlays;
             totalArtists += 1;
+        } else {
+            console.log(`Fetching data for ${artist.name}...`);``
+            const artistData = await singleArtistFetch(artist, genreID);
+            if (artistData) {
+                artists.push(artistData);
+                totalListeners = artistData.listeners ? totalListeners + artistData.listeners : totalListeners;
+                totalPlays = artistData.playcount ? totalPlays + artistData.playcount : totalPlays;
+                totalArtists += 1;
+            }
         }
     }
     return { artists, totalListeners, totalPlays, totalArtists };
@@ -130,7 +227,7 @@ async function getArtistsInGenre(genre: string, genreID: string) {
     let totalArtists = 0;
     try {
         const noAmpGenre = genre.replaceAll('&', '%26');
-        const firstRes = await axios.get<ArtistResponse>(`${ARTISTS_URL}?query=tag:${noAmpGenre}&limit=1&offset=0`, {
+        const firstRes = await axios.get<ArtistResponse>(`${ARTISTS_URL}?query=tag:"${noAmpGenre}"&limit=1&offset=0`, {
             headers: {
                 'User-Agent': USER_AGENT,
                 'Accept': 'application/json',
@@ -142,21 +239,24 @@ async function getArtistsInGenre(genre: string, genreID: string) {
 
         if (mbTotal > 0) {
             for (let offset = 0; offset < mbTotal; offset += LIMIT) {
-                const artists = await throttleQueue.enqueue(() => mbArtistsFetch(LIMIT, offset, noAmpGenre, genreID));
+                const artists = await mbArtistsFetch(LIMIT, offset, noAmpGenre, genreID);
                 totalListeners += artists.totalListeners;
                 totalPlays += artists.totalPlays;
                 totalArtists += artists.totalArtists;
                 allArtists.push(...artists.artists);
             }
         } else {
+            console.log(`No artists in MB for: ${genre}, trying Last.fm...`);
             const lastfmArtistsFirst = await axios.get(`${LASTFM_TAG_URL}${noAmpGenre}${URL_CONFIG}`);
             const totalPages = lastfmArtistsFirst.data.topartists['@attr'].totalPages;
-            for (let page = 1; page < totalPages; page += 1) {
-                const artists = await throttleQueue.enqueue(() => lastfmArtistsFetch(LASTFM_LIMIT, page, noAmpGenre, genreID));
-                totalListeners += artists.totalListeners;
-                totalPlays += artists.totalPlays;
-                totalArtists += artists.totalArtists;
-                allArtists.push(...artists.artists);
+            if (totalPages > 0) {
+                for (let page = 1; page <= totalPages; page += 1) {
+                    const artists = await lastfmArtistsFetch(LASTFM_LIMIT, page, noAmpGenre, genreID);
+                    totalListeners += artists.totalListeners;
+                    totalPlays += artists.totalPlays;
+                    totalArtists += artists.totalArtists;
+                    allArtists.push(...artists.artists);
+                }
             }
         }
         return { totalListeners, totalPlays, totalArtists };
@@ -166,7 +266,7 @@ async function getArtistsInGenre(genre: string, genreID: string) {
     }
 }
 
-async function main() {
+export async function generateDataset() {
     try {
         const firstRes = await axios.get<GenreResponse>(`${GENRES_URL}?limit=1&offset=0`, {
             headers: {
@@ -176,6 +276,7 @@ async function main() {
         });
 
         const total = firstRes.data['genre-count'];
+        console.log(`Fetching ${total} genres...`);
         const mbGenres: Genre[] = [];
 
         // Retrieve each page of genres (100 per request)
@@ -192,10 +293,20 @@ async function main() {
 
         const allGenres = [];
 
-        for (const genre of mbGenres) {
-            const scrapedData = await scrapeSingle(genre, genreIds);
-            const description = await wikiScrape(genre.name);
-            const artistData = await getArtistsInGenre(genre.id, genre.name);
+        for (let i = 0; i < mbGenres.length; i++) {
+            console.log(`Processing genre ${i + 1} of ${mbGenres.length}: ${mbGenres[i].name}...`);
+            const scrapedData = await scrapeSingle(mbGenres[i], genreIds);
+            let description = await wikiScrape(mbGenres[i].name);
+            let aiDesc = false;
+            if (!description) {
+                const aiDescription = await getAIGenreDesc(mbGenres[i].name);
+                if (aiDescription) {
+                    description = aiDescription;
+                    aiDesc = true;
+                }
+            }
+            console.log(`Fetching all artists in ${mbGenres[i].name}...`);
+            const artistData = await getArtistsInGenre(mbGenres[i].name, mbGenres[i].id);
 
             const genreData = {
                 ...scrapedData,
@@ -203,8 +314,11 @@ async function main() {
                 totalListeners: artistData.totalListeners,
                 totalPlays: artistData.totalPlays,
                 description: description,
+                descriptionAI: aiDesc,
             }
             allGenres.push(genreData);
+            await collections.genres?.updateOne({ id: genreData.id }, {$set: genreData}, {upsert: true});
+            console.log(genreData)
         }
 
 
@@ -214,4 +328,8 @@ async function main() {
     }
 }
 
-main().catch((err) => {console.log(err)});
+// async function main() {
+//     generateDataset();
+// }
+//
+// main().catch((err) => {console.log(err)});

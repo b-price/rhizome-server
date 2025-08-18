@@ -54,7 +54,6 @@ function extractData($: cheerio.CheerioAPI, cell: cheerio.Cheerio<any>): string[
     cell.find('bdi').each((_, element) => {
         data.push($(element).text().trim());
     });
-    console.log(data)
     return data;
 }
 

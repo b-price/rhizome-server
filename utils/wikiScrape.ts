@@ -13,7 +13,8 @@ export async function wikiScrape(genre: string) {
     }
 
     if (!result || !result.text) {
-        throw new Error(`No suitable paragraph found for ${genre}.`);
+        console.log(`No suitable paragraph found for ${genre}.`);
+        return '';
     }
 
     return result.text;
@@ -22,6 +23,7 @@ export async function wikiScrape(genre: string) {
 async function scrape(url: string, fallback: string) {
     try {
         let html = await fetchWithFallback(url, fallback);
+        if (!html) throw new Error('Could not fetch wiki html');
         const $ = cheerio.load(html);
 
         $('style').remove();
@@ -78,7 +80,7 @@ async function fetchWithFallback(primaryUrl: string, fallbackUrl: string) {
     if (!html) {
         html = await tryFetch(fallbackUrl);
         if (!html) {
-            throw new Error(`No Wikipedia article for ${primaryUrl}.`);
+            console.log(`No Wikipedia article for ${primaryUrl}.`);
         }
     }
     return html;
@@ -100,4 +102,4 @@ async function main() {
     console.log(result);
 }
 
-main().catch((err) => console.log(err));
+//main().catch((err) => console.log(err));

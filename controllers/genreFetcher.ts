@@ -20,7 +20,7 @@ const CACHE_DIR = path.join(process.cwd(), 'data', 'genres');
 const CACHE_DURATION_DAYS = 120;
 const FILTER_THRESHOLD = 0;
 
-export const fetchGenres = async (limit: number, offset: number): Promise<MBGenre[]> => {
+const fetchGenres = async (limit: number, offset: number): Promise<MBGenre[]> => {
     const res = await axios.get<GenreResponse>(`${BASE_URL}?limit=${limit}&offset=${offset}`, {
         headers: {
             'User-Agent': USER_AGENT,
