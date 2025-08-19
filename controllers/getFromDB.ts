@@ -1,0 +1,319 @@
+import {collections} from "../db/connection";
+import {Artist} from "../types";
+import {createArtistLinks} from "../utils/createArtistLinks";
+
+export async function getAllGenresFromDB() {
+    return await collections.genres?.find({}).toArray();
+}
+
+export async function getAllGenreData() {
+    return {
+        genres: await getAllGenresFromDB(),
+        links: await getGenreLinksFromDB(),
+    };
+}
+
+export async function getGenreArtistsFromDB(genreID: string) {
+    return await collections.artists?.find({ genres: genreID }).toArray();
+}
+
+export async function getGenreArtistData(genreID: string) {
+    const artists = await getGenreArtistsFromDB(genreID);
+    return {
+        artists,
+        links: createArtistLinks(artists as unknown as Artist[]),
+    }
+}
+
+export async function searchArtists(name: string) {
+    return await collections.artists?.find({ name }).toArray();
+}
+
+export async function searchGenres(name: string) {
+    return await collections.genres?.find({ name }).toArray();
+}
+
+export async function getGenreNameFromID(genreID: string) {
+    return await collections.genres?.findOne({ "id": genreID });
+}
+
+export async function getSimilarArtistsFromArray(artists: string[]) {
+    const similarArtists: Artist[] = [];
+    for (const artist of artists) {
+        const similarArtist = await collections.artists?.findOne({name: artist}) as unknown as Artist;
+        if (similarArtist) {
+            similarArtists.push(similarArtist);
+        }
+    }
+    return similarArtists;
+}
+
+export async function searchDB(query: string) {
+    const searchQuery = { $text: { $search: query } };
+    let genreResults = await collections.genres?.find(searchQuery).limit(10).toArray();
+    let artistResults = await collections.artists?.find(searchQuery).limit(10).toArray();
+    if (!genreResults) genreResults = [];
+    if (!artistResults) artistResults = [];
+    return [...artistResults, ...genreResults];
+}
+
+export async function getArtistByName(name: string) {
+    return await collections.artists?.findOne({ name: name });
+}
+
+export async function getSimilarArtistsFromArtist(artistId: string) {
+    const artist = await collections.artists?.findOne({ id: artistId });
+    let similarArtists: Artist[] = [];
+    if (artist) {
+        const simArtistNames = artist.similar;
+        if (simArtistNames && simArtistNames.length) {
+            similarArtists = await getSimilarArtistsFromArray(simArtistNames);
+        }
+    }
+    return similarArtists;
+}
+
+export async function getGenreLinksFromDB() {
+    return await collections.genres?.aggregate([
+        {
+            // Build all candidate links (both directions per field family), then canonicalize
+            $project: {
+                links: {
+                    $concatArrays: [
+                        // --- subgenre ---
+                        {
+                            $map: {
+                                input: { $ifNull: ["$subgenres", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "subgenre",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $map: {
+                                input: { $ifNull: ["$subgenre_of", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "subgenre",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+
+                        // --- influence ---
+                        {
+                            $map: {
+                                input: { $ifNull: ["$influenced_genres", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "influence",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $map: {
+                                input: { $ifNull: ["$influenced_by", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "influence",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+
+                        // --- fusion ---
+                        {
+                            $map: {
+                                input: { $ifNull: ["$fusion_genres", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "fusion",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $map: {
+                                input: { $ifNull: ["$fusion_of", []] },
+                                as: "r",
+                                in: {
+                                    $let: {
+                                        vars: {
+                                            a: "$id", b: "$$r.id", t: "fusion",
+                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
+                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                        },
+                                        in: {
+                                            source: "$$cs",
+                                            target: "$$ct",
+                                            linkType: "$$t",
+                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        // Drop empties/self-loops just in case
+        {
+            $project: {
+                links: {
+                    $filter: {
+                        input: "$links",
+                        as: "l",
+                        cond: {
+                            $and: [
+                                { $ne: ["$$l.source", null] },
+                                { $ne: ["$$l.target", null] },
+                                { $ne: ["$$l.source", ""] },
+                                { $ne: ["$$l.target", ""] },
+                                { $ne: ["$$l.source", "$$l.target"] }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        { $unwind: "$links" },
+        // De-duplicate across the whole collection (ignoring direction per linkType)
+        { $group: { _id: "$links.uKey", link: { $first: "$links" } } },
+        { $replaceRoot: { newRoot: { source: "$link.source", target: "$link.target", linkType: "$link.linkType" } } },
+        { $sort: { linkType: 1, source: 1, target: 1 } }
+    ]).toArray();
+}
+
+export async function getArtistLinksDB(genreID: string) {
+    return await collections.artists?.aggregate([
+        // 1) Only consider source artists in the genre
+        { $match: { genres: genreID } },
+
+        // 2) Expand similar names
+        {
+            $project: {
+                id: 1,
+                similar: { $ifNull: ["$similar", []] }
+            }
+        },
+        { $unwind: "$similar" },
+
+        // 3) Resolve the similar name to the first matching target artist in the same genre
+        {
+            $lookup: {
+                from: "Artists",
+                let: { simName: "$similar" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$name", "$$simName"] }, // name match (uses name index)
+                                    { $in: [genreID, "$genres"] }     // must also be in the genre
+                                ]
+                            }
+                        }
+                    },
+                    { $sort: { id: 1 } }, // deterministic "first"
+                    { $limit: 1 },
+                    { $project: { _id: 0, id: 1 } }
+                ],
+                as: "t"
+            }
+        },
+        { $unwind: "$t" },
+
+        // 4) Form the link (drop self-loops)
+        {
+            $project: {
+                src: "$id",
+                tgt: "$t.id",
+                _id: 0
+            }
+        },
+        { $match: { $expr: { $ne: ["$src", "$tgt"] } } },
+
+        // 5) Canonicalize endpoints to make links undirected for de-duplication
+        {
+            $addFields: {
+                cs: { $cond: [{ $lte: ["$src", "$tgt"] }, "$src", "$tgt"] },
+                ct: { $cond: [{ $lte: ["$src", "$tgt"] }, "$tgt", "$src"] },
+                linkType: { $literal: "similar" }
+            }
+        },
+        {
+            $addFields: {
+                uKey: { $concat: ["similar|", "$cs", "|", "$ct"] }
+            }
+        },
+
+        // 6) Global de-dup
+        {
+            $group: {
+                _id: "$uKey",
+                link: { $first: { source: "$cs", target: "$ct", linkType: "$linkType" } }
+            }
+        },
+        { $replaceRoot: { newRoot: "$link" } },
+        { $sort: { source: 1, target: 1 } }
+    ]).toArray();
+}

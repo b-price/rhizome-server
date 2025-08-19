@@ -1,14 +1,16 @@
-import {NodeLink} from "../types";
+import {Artist, NodeLink} from "../types";
 
-export const createArtistLinks = (tagMap: Map<string, string[]>) => {
+export const createArtistLinks = (artists: Artist[]) => {
     const pairs = new Set<NodeLink>();
 
-    for (const artists of tagMap.values()) {
-        const len = artists.length;
-        for (let i = 0; i < len; i++) {
-            for (let j = i + 1; j < len; j++) {
-                const [a1, a2] = [artists[i], artists[j]].sort(); // sort to normalize
-                pairs.add({source: a1, target: a2});
+    for (const artist of artists) {
+        if (artist.similar && artist.similar.length > 0) {
+            for (const similarName of artist.similar) {
+                const similarArtist = artists.find((artist) => artist.name === similarName);
+                if (similarArtist) {
+                    const [aS, aT] = [similarArtist.id, artist.id].sort();
+                    pairs.add({source: aS, target: aT, linkType: 'similar'});
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-import {Genre, GenreClusterMode, NodeLink} from '../types';
+import {Genre, LinkType, NodeLink} from '../types';
 
 export function genreLinksByRelation(genres: Genre[]): NodeLink[] {
     const linkSet = new Set<string>();
@@ -45,7 +45,7 @@ export function genreLinksByRelation(genres: Genre[]): NodeLink[] {
     return links;
 }
 
-const getLinkType = (link: string): GenreClusterMode => {
+const getLinkType = (link: string): LinkType => {
     switch (link) {
         case 'influenced_genres':
         case 'influenced_by':

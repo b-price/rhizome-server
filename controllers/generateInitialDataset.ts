@@ -2,8 +2,8 @@ import path from "path";
 import axios from "axios";
 import {Artist, ArtistData, ArtistJSON, ArtistResponse, Genre, MBGenre} from "../types";
 import throttleQueue from "../utils/throttleQueue";
-import { GenreResponse} from "../controllers/genreFetcher";
-import {getArtistImage} from "../controllers/getArtistImage";
+import { GenreResponse} from "./genreFetcher";
+import {getArtistImage} from "./getArtistImage";
 import {scrapeGenres, scrapeSingle} from "../utils/mbGenresScraper";
 import {wikiScrape} from "../utils/wikiScrape";
 import {getAIGenreDesc} from "../utils/geminiRequests";
@@ -235,7 +235,6 @@ async function getArtistsInGenre(genre: string, genreID: string) {
         });
 
         const mbTotal = firstRes.data.count;
-        const allArtists: Artist[] = [];
 
         if (mbTotal > 0) {
             for (let offset = 0; offset < mbTotal; offset += LIMIT) {
@@ -243,7 +242,6 @@ async function getArtistsInGenre(genre: string, genreID: string) {
                 totalListeners += artists.totalListeners;
                 totalPlays += artists.totalPlays;
                 totalArtists += artists.totalArtists;
-                allArtists.push(...artists.artists);
             }
         } else {
             console.log(`No artists in MB for: ${genre}, trying Last.fm...`);
@@ -255,7 +253,6 @@ async function getArtistsInGenre(genre: string, genreID: string) {
                     totalListeners += artists.totalListeners;
                     totalPlays += artists.totalPlays;
                     totalArtists += artists.totalArtists;
-                    allArtists.push(...artists.artists);
                 }
             }
         }

@@ -17,10 +17,17 @@ export interface Tag {
 
 export interface Artist extends BasicItem {
     tags: Tag[];
+    genres: string[];
+    listeners: number;
+    playcount: number;
+    similar: string[];
+    bio: LastFMBio;
+    noMBID: boolean;
     location?: string;
     startDate?: string;
     endDate?: string;
     image?: string;
+    badDataFlag?: boolean;
 }
 
 export interface ArtistData extends BasicItem {
@@ -52,7 +59,7 @@ export interface GenreArtistCountsJSON {
 export interface NodeLink {
     source: string;
     target: string;
-    linkType?: GenreClusterMode;
+    linkType?: LinkType;
 }
 
 export interface LastFMArtistJSON extends BasicItem {
@@ -86,9 +93,14 @@ export interface Genre extends SimpleGenre {
     fusion_genres: MBGenre[];
     fusion_of: MBGenre[];
     influenced_by: MBGenre[];
+    description?: string;
+    descriptionAI?: boolean;
+    totalListeners?: number;
+    totalPlays?: number;
     from?: string[];
     named_after_area?: string[];
     used_instruments?: string[];
+    badDataFlag?: boolean;
 }
 
 export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';
@@ -106,4 +118,4 @@ export interface LastFMSearchArtistData extends BasicItem {
     listeners: number;
 }
 
-export type GenreClusterMode = 'subgenre' | 'influence' | 'fusion';
+export type LinkType = 'subgenre' | 'influence' | 'fusion' | 'similar';
