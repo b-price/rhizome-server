@@ -36,10 +36,10 @@ export const getArtistImage = async (mbid: string, artistName: string) => {
         //console.log(res.data.relations.map(r => r.type));
         if (res.data.relations) {
             image = res.data.relations.find((r: { type: string; }) => r.type === 'image')?.url.resource;
-            // if (image && image.startsWith('https://commons.wikimedia.org/wiki/File:')) {
-            //     const filename = image.substring(image.lastIndexOf('/') + 1);
-            //     image = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' + filename;
-            // }
+            if (image && image.startsWith('https://commons.wikimedia.org/wiki/File:')) {
+                const filename = image.substring(image.lastIndexOf('/') + 1);
+                image = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/' + filename;
+            }
             if (!image) {
                 console.log(`No wiki image for artist ${artistName}, trying discogs...`);
                 const discogs = res.data.relations.find((r: { type: string; }) => r.type === 'discogs')?.url.resource;

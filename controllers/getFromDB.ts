@@ -1,6 +1,6 @@
 import {collections} from "../db/connection";
 import {Artist} from "../types";
-import {createArtistLinks} from "../utils/createArtistLinks";
+import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 
 export async function getAllGenresFromDB() {
     return await collections.genres?.find({}).toArray();
@@ -21,7 +21,7 @@ export async function getGenreArtistData(genreID: string) {
     const artists = await getGenreArtistsFromDB(genreID);
     return {
         artists,
-        links: createArtistLinks(artists as unknown as Artist[]),
+        links: createArtistLinksLessCPU(artists as unknown as Artist[]),
     }
 }
 

@@ -1,20 +1,23 @@
 import express from "express";
-import {getArtistData} from "../controllers/lastfmArtistData";
-import {getArtistImage} from "../controllers/getArtistImage";
-import {lastFMArtistSearch} from "../controllers/lastFMArtistSearch";
-import {mbArtistSearch} from "../controllers/mbArtistSearch";
 import {
     getArtistByName,
     getGenreArtistData,
     getSimilarArtistsFromArtist
 } from "../controllers/getFromDB";
 import {flagBadDataArtist} from "../controllers/writeToDB";
+import { memoryUsage } from "node:process"
 
 const router = express.Router();
 
 router.get('/:genreID', async (req, res) => {
     try {
+        // const startMem = memoryUsage.rss();
+        // const startTime = Date.now();
         const artistData = await getGenreArtistData(req.params.genreID);
+        // const finishMem = memoryUsage.rss();
+        // const endTime = Date.now();
+        // console.log(`Total time: ${endTime - startTime} for ${artistData.artists ? artistData.artists.length : 0} artists`);
+        // console.log(`Memory usage: ${finishMem - startMem}`)
         res.json(artistData);
     } catch (err) {
         console.error('Failed to fetch artists:', err);
@@ -48,50 +51,6 @@ router.put('/bdflag/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to update bad data flag:', err);
         res.status(500).json({ error: 'Failed to update bad data flag' });
-    }
-});
-
-//Deprecated
-
-router.get('/data/:id/:name', async (req, res) => {
-    try {
-        const artistData = await getArtistData(req.params.id, req.params.name);
-        res.json(artistData);
-    } catch (err) {
-        console.error('Failed to fetch artist:', err);
-        res.status(500).json({ error: 'Failed to fetch artist data' });
-    }
-});
-
-router.get('/image/:id', async (req, res) => {
-    try {
-        const image = await getArtistImage(req.params.id, req.params.id); // hack, should pass name
-        res.json(image);
-    } catch (err) {
-        console.error('Failed to fetch artist image:', err);
-        res.status(500).json({ error: 'Failed to fetch artist image' });
-    }
-});
-
-router.get('/search/:name', async (req, res) => {
-    try {
-        console.log(req.params.name);
-        const artistsData = await lastFMArtistSearch(req.params.name);
-        res.json(artistsData);
-    } catch (err) {
-        console.error('Failed to search artists:', err);
-        res.status(500).json({ error: 'Failed to search artists' });
-    }
-});
-
-router.get('/mb-search/:name', async (req, res) => {
-    try {
-        console.log(req.params.name);
-        const artistsData = await mbArtistSearch(req.params.name);
-        res.json(artistsData);
-    } catch (err) {
-        console.error('Failed to search artists:', err);
-        res.status(500).json({ error: 'Failed to search artists' });
     }
 });
 

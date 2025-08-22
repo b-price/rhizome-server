@@ -14,14 +14,4 @@ router.get('/:password', async (req, res) => {
     }
 });
 
-router.get('/genrelinks/:password', async (req, res) => {
-    try {
-        if (req.params.password !== password) throw new Error("Invalid Password");
-
-    } catch (err) {
-        console.error('Failed to create genre links:', err);
-        res.status(500).json({ error: 'Failed to create genre links' });
-    }
-});
-
 export default router;

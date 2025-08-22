@@ -1,14 +1,15 @@
 import path from "path";
 import axios from "axios";
-import {Artist, ArtistData, ArtistJSON, ArtistResponse, Genre, MBGenre} from "../types";
+import {ArtistData, ArtistResponse, Genre, GenreResponse, MBGenre} from "../types";
 import throttleQueue from "../utils/throttleQueue";
-import { GenreResponse} from "./genreFetcher";
 import {getArtistImage} from "./getArtistImage";
-import {scrapeGenres, scrapeSingle} from "../utils/mbGenresScraper";
+import {scrapeSingle} from "../utils/mbGenresScraper";
 import {wikiScrape} from "../utils/wikiScrape";
 import {getAIGenreDesc} from "../utils/geminiRequests";
 import {ObjectId} from "mongodb";
 import {collections} from "../db/connection";
+import {loadFromCache} from "../utils/cacheOps";
+import fs from "fs";
 
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const GENRES_URL = `${process.env.MB_URL}genre/all`;
@@ -263,24 +264,35 @@ async function getArtistsInGenre(genre: string, genreID: string) {
     }
 }
 
+export async function getMBGenres(genresSize?: number) {
+    const firstRes = await axios.get<GenreResponse>(`${GENRES_URL}?limit=1&offset=0`, {
+        headers: {
+            'User-Agent': USER_AGENT,
+            'Accept': 'application/json',
+        },
+    });
+
+    const total = firstRes.data['genre-count'];
+    // if (genresSize && genresSize === total) {
+    //     const cacheFilePath = path.join(CACHE_DIR, 'allGenres.json');
+    //     return JSON.parse(fs.readFileSync(cacheFilePath, 'utf8')) as Genre[];
+    // }
+    console.log(`Fetching ${total} genres...`);
+    const mbGenres: Genre[] = [];
+
+    // Retrieve each page of genres (100 per request)
+    for (let offset = 0; offset < total; offset += LIMIT) {
+        const genres = await throttleQueue.enqueue(() => fetchGenres(LIMIT, offset));
+        mbGenres.push(...genres);
+    }
+
+    return mbGenres;
+}
+
 export async function generateDataset() {
     try {
-        const firstRes = await axios.get<GenreResponse>(`${GENRES_URL}?limit=1&offset=0`, {
-            headers: {
-                'User-Agent': USER_AGENT,
-                'Accept': 'application/json',
-            },
-        });
-
-        const total = firstRes.data['genre-count'];
-        console.log(`Fetching ${total} genres...`);
-        const mbGenres: Genre[] = [];
-
-        // Retrieve each page of genres (100 per request)
-        for (let offset = 0; offset < total; offset += LIMIT) {
-            const genres = await throttleQueue.enqueue(() => fetchGenres(LIMIT, offset));
-            mbGenres.push(...genres);
-        }
+        const genresSize = await collections.genres?.countDocuments();
+        const mbGenres = await getMBGenres(genresSize);
 
         if (!mbGenres || mbGenres.length === 0) {
             throw new Error('No genres found!');
