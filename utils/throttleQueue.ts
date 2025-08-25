@@ -3,7 +3,7 @@ type RequestTask = () => Promise<any>;
 class ThrottleQueue {
     private queue: RequestTask[] = [];
     private running = false;
-    private delay = 600;
+    private delay = 1100;
 
     enqueue(task: RequestTask): Promise<any> {
         return new Promise((resolve, reject) => {

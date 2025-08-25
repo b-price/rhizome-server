@@ -1,18 +1,38 @@
-import {NodeLink} from "../types";
+import {Artist, NodeLink} from "../types";
 
-export const createArtistLinks = (tagMap: Map<string, string[]>) => {
+//Don't use; always worse on time and sometimes worse on memory
+export const createArtistLinksLessMemory = (artists: Artist[]) => {
     const pairs = new Set<NodeLink>();
 
-    for (const artists of tagMap.values()) {
-        const len = artists.length;
-        for (let i = 0; i < len; i++) {
-            for (let j = i + 1; j < len; j++) {
-                const [a1, a2] = [artists[i], artists[j]].sort(); // sort to normalize
-                pairs.add({source: a1, target: a2});
+    for (const artist of artists) {
+        if (artist.similar && artist.similar.length > 0) {
+            for (const similarName of artist.similar) {
+                const similarArtist = artists.find((artist) => artist.name === similarName);
+                if (similarArtist) {
+                    const [aS, aT] = [similarArtist.id, artist.id].sort();
+                    pairs.add({source: aS, target: aT, linkType: 'similar'});
+                }
             }
         }
     }
 
-    // Convert back to array of pairs
+    return Array.from(pairs);
+}
+
+export const createArtistLinksLessCPU = (artists: Artist[]) => {
+    const pairs = new Set<NodeLink>();
+    const artistsMap = new Map<string, string>(artists.map(a => [a.name, a.id]));
+    for (const artist of artists) {
+        if (artist.similar && artist.similar.length > 0) {
+            for (const similarName of artist.similar) {
+                const similarArtistID = artistsMap.get(similarName);
+                if (similarArtistID) {
+                    const [aS, aT] = [similarArtistID, artist.id].sort();
+                    pairs.add({source: aS, target: aT, linkType: 'similar'});
+                }
+            }
+        }
+    }
+
     return Array.from(pairs);
 }

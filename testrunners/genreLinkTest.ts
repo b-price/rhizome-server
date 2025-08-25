@@ -2,30 +2,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { genreLinksByRelation } from '../utils/genreLinksByRelation';
 import {ensureCacheDir, saveToCache} from "../utils/cacheOps";
-
-interface GenreRelation {
-    id: string;
-    name: string;
-}
-
-interface ExtendedGenre {
-    id: string;
-    name: string;
-    artistCount: number;
-    subgenre_of: GenreRelation[];
-    influenced_genres: GenreRelation[];
-    subgenres: GenreRelation[];
-    fusion_genres: GenreRelation[];
-    fusion_of: GenreRelation[];
-    influenced_by: GenreRelation[];
-}
+import {Genre} from "../types";
 
 function runGenreLinkTest() {
     try {
         // Read the genres from the JSON file
         const filePath = path.join(__dirname, '..', 'data', 'genres', 'allGenres.json');
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const genres: ExtendedGenre[] = JSON.parse(fileContent).genres;
+        const genres: Genre[] = JSON.parse(fileContent).genres;
 
         console.log(`Loaded ${genres.length} genres from allGenres.json`);
 

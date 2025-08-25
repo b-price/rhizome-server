@@ -2,14 +2,9 @@ import axios from 'axios';
 import * as path from 'path';
 import throttleQueue from '../utils/throttleQueue';
 import {loadFromCache, saveToCache} from "../utils/cacheOps";
-import {ArtistResponse, CacheResponse, Genre, GenresJSON, MBGenre} from "../types";
+import {ArtistResponse, CacheResponse, Genre, GenreResponse, GenresJSON, MBGenre} from "../types";
 import {genreLinksByRelation} from "../utils/genreLinksByRelation";
 import {scrapeGenres} from "../utils/mbGenresScraper";
-
-interface GenreResponse {
-    'genre-count': number;
-    genres: MBGenre[];
-}
 
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const BASE_URL = `${process.env.MB_URL}genre/all`;
