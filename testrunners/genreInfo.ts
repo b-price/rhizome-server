@@ -1,10 +1,8 @@
 import path from "path";
 import fs from "fs";
-import {Genre, MBGenre} from "../types";
-import {getSingletons} from "../utils/getSingletons";
+import {Genre, MBGenre, GenreResponse} from "../types";
 import {ensureCacheDir} from "../utils/cacheOps";
 import axios from "axios";
-import {GenreResponse} from "../controllers/genreFetcher";
 import throttleQueue from "../utils/throttleQueue";
 
 const APP_NAME='Rhizome'
