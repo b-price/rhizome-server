@@ -120,6 +120,8 @@ export interface LastFMSearchArtistData extends BasicItem {
 
 export type LinkType = 'subgenre' | 'influence' | 'fusion' | 'similar';
 
+export type ParentField = 'subgenre_of' | 'influenced_by' | 'fusion_of';
+
 export interface GenreResponse {
     'genre-count': number;
     genres: MBGenre[];

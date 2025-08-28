@@ -1,5 +1,5 @@
 import {collections} from "../db/connection";
-import {Artist} from "../types";
+import {Artist, Genre, ParentField, LinkType} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 
 export async function getAllGenresFromDB() {
@@ -34,7 +34,7 @@ export async function searchGenres(name: string) {
 }
 
 export async function getGenreNameFromID(genreID: string) {
-    return await collections.genres?.findOne({ "id": genreID });
+    return await collections.genres?.findOne({ id: genreID });
 }
 
 export async function getSimilarArtistsFromArray(artists: string[]) {
@@ -71,6 +71,52 @@ export async function getSimilarArtistsFromArtist(artistId: string) {
         }
     }
     return similarArtists;
+}
+
+export async function getNoParentGenreArtists(genreID: string, linkType: ParentField) {
+    const childGenres = await getGenreTreeFromParent(genreID, linkType);
+    if (childGenres && childGenres.length) {
+        const childGenreIDs = childGenres.map(genre => genre.id);
+        return await collections.artists?.find({
+            genres: { $in: childGenreIDs, $nin: [genreID] }
+        }).toArray();
+    }
+    return [];
+}
+
+export async function getParentOnlyArtists(genreID: string, linkType: ParentField) {
+    const childGenres = await getGenreTreeFromParent(genreID, linkType);
+    if (childGenres && childGenres.length) {
+        const childGenreIDs = childGenres.map(genre => genre.id);
+        return await collections.artists?.find({$and: [{genres: genreID}, {genres: { $nin: [...childGenreIDs]}}]}).toArray();
+    }
+    return [];
+}
+
+export async function getGenreTreeFromParent(
+    genreID: string,
+    linkField: ParentField = "subgenre_of",
+) {
+    const cursor = collections.genres?.aggregate([
+        { $match: { id: genreID } },
+        {
+            $graphLookup: {
+                from: "Genres",
+                startWith: "$id",
+                connectFromField: "id",
+                connectToField: `${linkField}.id`,
+                as: "descendants",
+                depthField: "depth",
+                // Optional: keep the search tight
+                // restrictSearchWithMatch: { [linkField]: { $exists: true, $ne: [] } }
+            },
+        },
+        { $project: { _id: 0, descendants: 1 } },
+        { $unwind: "$descendants" },
+        { $replaceRoot: { newRoot: "$descendants" } },
+    ]);
+
+    return (await cursor?.toArray()) ?? [];
 }
 
 export async function getGenreLinksFromDB() {

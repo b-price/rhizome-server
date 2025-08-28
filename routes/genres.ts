@@ -1,6 +1,11 @@
 import express from "express";
-import {getAllGenreData, getAllGenresFromDB, getGenreNameFromID} from "../controllers/getFromDB";
+import {
+    getAllGenreData,
+    getGenreNameFromID,
+    getGenreTreeFromParent
+} from "../controllers/getFromDB";
 import {flagBadDataGenre} from "../controllers/writeToDB";
+import {ParentField} from "../types";
 
 const router = express.Router();
 
@@ -21,6 +26,16 @@ router.get('/:genreID', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch genre:', err);
         res.status(500).json({ error: 'Failed to fetch genre' });
+    }
+});
+
+router.get('/tree/:genreID/:linktype', async (req, res) => {
+    try {
+        const genreTree = await getGenreTreeFromParent(req.params.genreID, req.params.linktype as ParentField);
+        res.json(genreTree);
+    } catch (err) {
+        console.error('Failed to fetch genre tree:', err);
+        res.status(500).json({ error: 'Failed to fetch genre tree' });
     }
 });
 

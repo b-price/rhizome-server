@@ -1,11 +1,12 @@
 import express from "express";
 import {
     getArtistByName,
-    getGenreArtistData,
+    getGenreArtistData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist
 } from "../controllers/getFromDB";
 import {flagBadDataArtist} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
+import {ParentField, LinkType} from "../types";
 
 const router = express.Router();
 
@@ -42,6 +43,26 @@ router.get('/similar/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch similar artists:', err);
         res.status(500).json({ error: 'Failed to fetch similar artists' });
+    }
+});
+
+router.get('/parentonly/:genreID/:linktype', async (req, res) => {
+    try {
+        const parentOnlyArtists = await getParentOnlyArtists(req.params.genreID, req.params.linktype as ParentField);
+        res.json(parentOnlyArtists);
+    } catch (err) {
+        console.error('Failed to fetch parent-only artists:', err);
+        res.status(500).json({ error: 'Failed to fetch parent-only artists' });
+    }
+});
+
+router.get('/noparent/:genreID/:linktype', async (req, res) => {
+    try {
+        const noParentArtists = await getNoParentGenreArtists(req.params.genreID, req.params.linktype as ParentField);
+        res.json(noParentArtists);
+    } catch (err) {
+        console.error('Failed to fetch parent-only artists:', err);
+        res.status(500).json({ error: 'Failed to fetch parent-only artists' });
     }
 });
 
