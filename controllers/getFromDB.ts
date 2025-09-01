@@ -134,15 +134,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "subgenre",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "subgenre" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }
@@ -155,15 +162,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "subgenre",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "subgenre" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }
@@ -178,15 +192,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "influence",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "influence" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }
@@ -199,15 +220,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "influence",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "influence" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }
@@ -222,15 +250,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "fusion",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "fusion" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }
@@ -243,15 +278,22 @@ export async function getGenreLinksFromDB() {
                                 in: {
                                     $let: {
                                         vars: {
-                                            a: "$id", b: "$$r.id", t: "fusion",
-                                            cs: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$id", "$$r.id"] },
-                                            ct: { $cond: [{ $lte: ["$id", "$$r.id"] }, "$$r.id", "$id"] }
+                                            a: { $convert: { input: "$id", to: "string", onNull: "", onError: "" } },
+                                            b: {
+                                                // handle cases where $$r is an object-with-id or an ObjectId, or already a string
+                                                $cond: [
+                                                    { $eq: [{ $type: "$$r.id" }, "object"] },
+                                                    { $convert: { input: "$$r.id.id", to: "string", onNull: "", onError: "" } },
+                                                    { $convert: { input: "$$r.id",    to: "string", onNull: "", onError: "" } }
+                                                ]
+                                            },
+                                            t: "fusion" // or "influence"/"fusion" in those blocks
                                         },
                                         in: {
-                                            source: "$$cs",
-                                            target: "$$ct",
+                                            source: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] },
+                                            target: { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] },
                                             linkType: "$$t",
-                                            uKey: { $concat: ["$$t", "|", "$$cs", "|", "$$ct"] }
+                                            uKey: { $concat: ["$$t", "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$a", "$$b"] }, "|", { $cond: [{ $lte: ["$$a", "$$b"] }, "$$b", "$$a"] }] }
                                         }
                                     }
                                 }

@@ -39,9 +39,9 @@ router.get('/tree/:genreID/:linktype', async (req, res) => {
     }
 });
 
-router.put('/bdflag/:id', async (req, res) => {
+router.put('/bdflag/:id/:reason', async (req, res) => {
     try {
-        await flagBadDataGenre(req.params.id);
+        await flagBadDataGenre(req.params.id, req.params.reason);
         res.status(200).json({ message: 'Updated bad data flag' });
     } catch (err) {
         console.error('Failed to update bad data flag:', err);

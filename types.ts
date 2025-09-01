@@ -28,6 +28,7 @@ export interface Artist extends BasicItem {
     endDate?: string;
     image?: string;
     badDataFlag?: boolean;
+    badDataReason?: string;
 }
 
 export interface ArtistData extends BasicItem {
@@ -101,6 +102,7 @@ export interface Genre extends SimpleGenre {
     named_after_area?: string[];
     used_instruments?: string[];
     badDataFlag?: boolean;
+    badDataReason?: string;
 }
 
 export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';
