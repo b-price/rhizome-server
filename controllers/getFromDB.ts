@@ -1,5 +1,5 @@
 import {collections} from "../db/connection";
-import {Artist, Genre, ParentField, LinkType} from "../types";
+import {Artist, Genre, ParentField, LinkType, FilterField} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 
 export async function getAllGenresFromDB() {
@@ -23,6 +23,10 @@ export async function getGenreArtistData(genreID: string) {
         artists,
         links: createArtistLinksLessCPU(artists as unknown as Artist[]),
     }
+}
+
+export async function getAllArtistsFiltered(filter: FilterField, amount: number) {
+    return await collections.artists?.find({ [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
 }
 
 export async function searchArtists(name: string) {

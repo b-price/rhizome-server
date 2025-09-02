@@ -124,6 +124,8 @@ export type LinkType = 'subgenre' | 'influence' | 'fusion' | 'similar';
 
 export type ParentField = 'subgenre_of' | 'influenced_by' | 'fusion_of';
 
+export type FilterField = 'listeners' | 'playcount';
+
 export interface GenreResponse {
     'genre-count': number;
     genres: MBGenre[];

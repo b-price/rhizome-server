@@ -1,12 +1,13 @@
 import express from "express";
 import {
+    getAllArtistsFiltered,
     getArtistByName,
     getGenreArtistData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist
 } from "../controllers/getFromDB";
 import {flagBadDataArtist} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
-import {ParentField, LinkType} from "../types";
+import {ParentField, LinkType, FilterField} from "../types";
 
 const router = express.Router();
 
@@ -25,6 +26,19 @@ router.get('/:genreID', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch artists' });
     }
 });
+
+router.get('/:filter/:amount', async (req, res) => {
+    try {
+        if (!req.params.filter || !req.params.amount || parseInt(req.params.amount) < 1) {
+            throw new Error('Invalid parameter')
+        }
+        const artistData = await getAllArtistsFiltered(req.params.filter as FilterField, parseInt(req.params.amount));
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists:', err);
+        res.status(500).json({ error: 'Failed to fetch artists' });
+    }
+})
 
 router.get('/name/:name', async (req, res) => {
     try {
