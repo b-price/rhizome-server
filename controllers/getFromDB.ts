@@ -25,6 +25,15 @@ export async function getGenreArtistData(genreID: string) {
     }
 }
 
+export async function getArtistDataFiltered(filter: FilterField, amount: number) {
+    const artists = await getAllArtistsFiltered(filter, amount);
+    return {
+        artists,
+        count: await collections.artists?.estimatedDocumentCount(),
+        links: createArtistLinksLessCPU(artists as unknown as Artist[]),
+    }
+}
+
 export async function getAllArtistsFiltered(filter: FilterField, amount: number) {
     return await collections.artists?.find({ [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
 }

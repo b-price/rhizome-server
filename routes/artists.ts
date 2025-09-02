@@ -1,7 +1,6 @@
 import express from "express";
 import {
-    getAllArtistsFiltered,
-    getArtistByName,
+    getArtistByName, getArtistDataFiltered,
     getGenreArtistData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist
 } from "../controllers/getFromDB";
@@ -32,7 +31,7 @@ router.get('/:filter/:amount', async (req, res) => {
         if (!req.params.filter || !req.params.amount || parseInt(req.params.amount) < 1) {
             throw new Error('Invalid parameter')
         }
-        const artistData = await getAllArtistsFiltered(req.params.filter as FilterField, parseInt(req.params.amount));
+        const artistData = await getArtistDataFiltered(req.params.filter as FilterField, parseInt(req.params.amount));
         res.json(artistData);
     } catch (err) {
         console.error('Failed to fetch artists:', err);
