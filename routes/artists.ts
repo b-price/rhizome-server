@@ -4,7 +4,7 @@ import {
     getGenreArtistData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist
 } from "../controllers/getFromDB";
-import {flagBadDataArtist} from "../controllers/writeToDB";
+import {flipBadDataArtist} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
 
@@ -81,7 +81,7 @@ router.get('/noparent/:genreID/:linktype', async (req, res) => {
 
 router.put('/bdflag/:id/:reason', async (req, res) => {
     try {
-        await flagBadDataArtist(req.params.id, req.params.reason);
+        await flipBadDataArtist(req.params.id, req.params.reason);
         res.status(200).json({ message: 'Updated bad data flag' });
     } catch (err) {
         console.error('Failed to update bad data flag:', err);

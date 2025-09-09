@@ -1,16 +1,28 @@
 import {collections} from "../db/connection";
 import {Artist, Genre, ParentField, LinkType, FilterField} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
+import {ObjectId} from "mongodb";
 
 export async function getAllGenresFromDB() {
-    return await collections.genres?.find({}).toArray();
+    return await collections.genres?.find({}).toArray() as unknown as Genre[];
 }
 
 export async function getAllGenreData() {
-    return {
-        genres: await getAllGenresFromDB(),
-        links: await getGenreLinksFromDB(),
-    };
+    const genresStart = Date.now();
+    console.log('Fetching genres...')
+    const genres = await getAllGenresFromDB();
+    const genresEnd = Date.now();
+    console.log(`Genre docs took ${genresEnd - genresStart}ms`);
+    const linksStart = Date.now();
+    console.log('Generating links...')
+    const links = await getGenreLinksFromDB();
+    const linksEnd = Date.now();
+    console.log(`Genre links took ${linksEnd - linksStart}ms`);
+    return { genres, links };
+    // return {
+    //     genres: await getAllGenresFromDB(),
+    //     links: await getGenreLinksFromDB(),
+    // };
 }
 
 export async function getGenreArtistsFromDB(genreID: string) {
@@ -417,4 +429,23 @@ export async function getArtistLinksDB(genreID: string) {
         { $replaceRoot: { newRoot: "$link" } },
         { $sort: { source: 1, target: 1 } }
     ]).toArray();
+}
+
+export async function getGenreRoots() {
+    return await collections.genres?.find({
+        $and: [
+            { subgenre_of: { $size: 0 } },
+            { fusion_of: { $size: 0 } },
+            {
+                $or: [
+                    { subgenres: { $not: { $size: 0 } } },
+                    { fusion_genres: { $not: { $size: 0 } } }
+                ]
+            }
+        ]
+    }).toArray();
+}
+
+export async function getGenreRootsDoc() {
+    return await collections.misc?.findOne({_id: new ObjectId(process.env.ROOTS_DOCUMENT_ID)});
 }

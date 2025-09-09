@@ -130,3 +130,10 @@ export interface GenreResponse {
     'genre-count': number;
     genres: MBGenre[];
 }
+
+export interface BadDataReport {
+    userID: string;
+    itemType: 'genre' | 'artist';
+    itemID: string;
+    field: keyof Artist | keyof Genre;
+}
