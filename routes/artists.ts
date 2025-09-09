@@ -1,8 +1,8 @@
 import express from "express";
 import {
     getArtistByName, getArtistDataFiltered,
-    getGenreArtistData, getNoParentGenreArtists, getParentOnlyArtists,
-    getSimilarArtistsFromArtist
+    getGenreArtistData, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
+    getSimilarArtistsFromArtist, getTopArtists
 } from "../controllers/getFromDB";
 import {flipBadDataArtist} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
@@ -76,6 +76,30 @@ router.get('/noparent/:genreID/:linktype', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch parent-only artists:', err);
         res.status(500).json({ error: 'Failed to fetch parent-only artists' });
+    }
+});
+
+router.get('/top/:genreID/:amount', async (req, res) => {
+    try {
+        const topArtists = await getTopArtists(req.params.genreID, parseInt(req.params.amount));
+        res.json(topArtists);
+    } catch (err) {
+        console.error('Failed to fetch top artists:', err);
+        res.status(500).json({ error: 'Failed to fetch top artists' });
+    }
+})
+
+router.post('/:filter/:amount', async (req, res) => {
+    try {
+        const genres = req.body.genres;
+        if (!req.params.filter || !req.params.amount || parseInt(req.params.amount) < 1 || !genres || !genres.length) {
+            throw new Error('Invalid parameter')
+        }
+        const artistData = await getMultipleGenresArtistsData(req.params.filter as FilterField, parseInt(req.params.amount), genres);
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists from genres:', err);
+        res.status(500).json({ error: 'Failed to fetch artists from genres' });
     }
 });
 

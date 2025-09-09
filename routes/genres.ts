@@ -42,7 +42,6 @@ router.get('/tree/:genreID/:linktype', async (req, res) => {
 router.get('/tree/roots', async (req, res) => {
     try {
         const roots = await getGenreRootsDoc();
-        console.log(roots, "roots:");
         res.json(roots);
     } catch (err) {
         console.error('Failed to fetch genre roots:', err);

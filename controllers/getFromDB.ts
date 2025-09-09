@@ -37,6 +37,39 @@ export async function getGenreArtistData(genreID: string) {
     }
 }
 
+export async function getTopArtists(genreID: string, amount: number) {
+    const genreName = await collections.genres?.findOne({id: genreID}, {projection: {name: 1, _id: 0}});
+    if (genreName) {
+        return await collections.artists?.aggregate([
+            // Only keep artists that actually have the genre tag
+            { $match: { "tags.name": genreName.name } },
+
+            // Add a field with just the matching tag
+            {
+                $addFields: {
+                    matchingTag: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: "$tags",
+                                    as: "t",
+                                    cond: { $eq: ["$$t.name", genreName.name] }
+                                }
+                            },
+                            0
+                        ]
+                    }
+                }
+            },
+
+            { $sort: { "matchingTag.count": -1 } },
+            { $limit: amount },
+            { $unset: "matchingTag" }
+        ]).toArray();
+    }
+    return [];
+}
+
 export async function getArtistDataFiltered(filter: FilterField, amount: number) {
     const artists = await getAllArtistsFiltered(filter, amount);
     return {
@@ -48,6 +81,35 @@ export async function getArtistDataFiltered(filter: FilterField, amount: number)
 
 export async function getAllArtistsFiltered(filter: FilterField, amount: number) {
     return await collections.artists?.find({ [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
+}
+
+export async function getMultipleGenresArtistsData(filter: FilterField, amount: number, genreIDs: string[]) {
+    const artists = await getMultipleGenresArtists(filter, amount, genreIDs);
+    return {
+        artists,
+        count: await getArtistCountSum(genreIDs),
+        links: createArtistLinksLessCPU(artists as unknown as Artist[]),
+    }
+}
+
+export async function getMultipleGenresArtists(filter: FilterField, amount: number, genreIDs: string[]) {
+    return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
+}
+
+export async function getArtistCountSum(genreIDs: string[]) {
+    const result = await collections.genres?.aggregate([
+        {
+            $match: { id: { $in: genreIDs } }
+        },
+        {
+            $group: {
+                _id: null,
+                totalArtistCount: { $sum: "$artistCount" }
+            }
+        }
+    ]).toArray();
+
+    return result && result.length > 0 ? result[0].totalArtistCount : 0;
 }
 
 export async function searchArtists(name: string) {
