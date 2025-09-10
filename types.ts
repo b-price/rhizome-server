@@ -133,7 +133,9 @@ export interface GenreResponse {
 
 export interface BadDataReport {
     userID: string;
-    itemType: 'genre' | 'artist';
+    type: 'artist' | 'genre';
     itemID: string;
-    field: keyof Artist | keyof Genre;
+    reason: string;
+    resolved: boolean;
+    details?: string;
 }

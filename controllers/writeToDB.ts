@@ -2,6 +2,7 @@ import {collections} from "../db/connection";
 import {getAllGenresFromDB, getGenreRoots} from "./getFromDB";
 import {getRootGenresOfGenre} from "../utils/rootGenres";
 import {ObjectId} from "mongodb";
+import {BadDataReport} from "../types";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -63,4 +64,18 @@ export async function updateRootGenres() {
             if (newDoc) console.log(newDoc.insertedId);
         }
     }
+}
+
+export async function submitBadDataReport(report: BadDataReport) {
+    if (report.type === 'genre') await setBadDataGenre(report.itemID);
+    if (report.type === 'artist') await setBadDataArtist(report.itemID);
+    await collections.badDataReports?.insertOne(report);
+}
+
+async function setBadDataGenre(genreID: string) {
+    await collections.genres?.updateOne({ id: genreID }, [{ $set: { badDataFlag: true } }]);
+}
+
+async function setBadDataArtist(artistID: string) {
+    await collections.artists?.updateOne({ id: artistID }, [{ $set: { badDataFlag: true } }]);
 }

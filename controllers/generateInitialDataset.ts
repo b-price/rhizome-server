@@ -11,6 +11,7 @@ import {collections} from "../db/connection";
 import {loadFromCache} from "../utils/cacheOps";
 import fs from "fs";
 
+//TODO: make sure to account for duplicate mbids
 const USER_AGENT = `${process.env.APP_NAME}/${process.env.APP_VERSION} ( ${process.env.APP_CONTACT} )`;
 const GENRES_URL = `${process.env.MB_URL}genre/all`;
 const ARTISTS_URL = `${process.env.MB_URL}artist`;

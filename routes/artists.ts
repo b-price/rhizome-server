@@ -1,10 +1,10 @@
 import express from "express";
 import {
-    getArtistByName, getArtistDataFiltered,
+    getArtistByName, getArtistDataFiltered, getDuplicateArtists,
     getGenreArtistData, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist, getTopArtists
 } from "../controllers/getFromDB";
-import {flipBadDataArtist} from "../controllers/writeToDB";
+import {flipBadDataArtist, submitBadDataReport} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
 
@@ -87,6 +87,20 @@ router.get('/top/:genreID/:amount', async (req, res) => {
         console.error('Failed to fetch top artists:', err);
         res.status(500).json({ error: 'Failed to fetch top artists' });
     }
+});
+
+router.get('/duplicates/all/dupes', async (req, res) => {
+    try {
+        const dupes = await getDuplicateArtists();
+        if (dupes) {
+            const dupeSet = new Set(dupes.map(d => d.id))
+            res.json(Array.from(dupeSet));
+        }
+        res.end();
+    } catch (err) {
+        console.error('Failed to fetch duplicate artists:', err);
+        res.status(500).json({ error: 'Failed to fetch duplicate artists' });
+    }
 })
 
 router.post('/:filter/:amount', async (req, res) => {
@@ -100,6 +114,20 @@ router.post('/:filter/:amount', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch artists from genres:', err);
         res.status(500).json({ error: 'Failed to fetch artists from genres' });
+    }
+});
+
+router.post('/baddata/report/submit', async (req, res) => {
+    try {
+        const report = req.body.report;
+        if (!report || !('itemID' in report) || !('userID' in report) || !('reason' in report) || !('type' in report)) {
+            throw new Error('Invalid report');
+        }
+        await submitBadDataReport(report);
+        res.status(200).json({ message: 'Submitted bad data report' });
+    } catch (err) {
+        console.error('Failed to submit bad data report:', err);
+        res.status(500).json({ error: 'Failed to submit bad data report' });
     }
 });
 

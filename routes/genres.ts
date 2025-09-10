@@ -4,7 +4,7 @@ import {
     getGenreNameFromID, getGenreRootsDoc,
     getGenreTreeFromParent
 } from "../controllers/getFromDB";
-import {addRootsToGenres, flipBadDataGenre} from "../controllers/writeToDB";
+import {addRootsToGenres, flipBadDataGenre, submitBadDataReport} from "../controllers/writeToDB";
 import {ParentField} from "../types";
 
 const router = express.Router();
@@ -66,6 +66,20 @@ router.put('/bdflag/:id/:reason', async (req, res) => {
     } catch (err) {
         console.error('Failed to update bad data flag:', err);
         res.status(500).json({ error: 'Failed to update bad data flag' });
+    }
+});
+
+router.post('/baddata/report', async (req, res) => {
+    try {
+        const report = req.body.report;
+        if (!report || !('itemID' in report) || !('userID' in report) || !('reason' in report) || !('type' in report)) {
+            throw new Error('Invalid report');
+        }
+        await submitBadDataReport(report);
+        res.status(200).json({ message: 'Submitted bad data report' });
+    } catch (err) {
+        console.error('Failed to submit bad data report:', err);
+        res.status(500).json({ error: 'Failed to submit bad data report' });
     }
 });
 

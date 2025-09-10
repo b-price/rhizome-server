@@ -511,3 +511,17 @@ export async function getGenreRoots() {
 export async function getGenreRootsDoc() {
     return await collections.misc?.findOne({_id: new ObjectId(process.env.ROOTS_DOCUMENT_ID)});
 }
+
+export async function getDuplicateArtists() {
+    return await collections.artists?.aggregate([  { $match: { id: { $type: "string" } } }, // optional: skip null/missing
+        {
+            $setWindowFields: {
+                partitionBy: "$id",
+                output: {
+                    duplicateCount: { $count: {} }
+                }
+            }
+        },
+        { $match: { duplicateCount: { $gt: 1 } } },
+        { $project: { duplicateCount: 0 } }]).toArray();
+}
