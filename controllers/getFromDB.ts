@@ -9,15 +9,15 @@ export async function getAllGenresFromDB() {
 
 export async function getAllGenreData() {
     const genresStart = Date.now();
-    console.log('Fetching genres...')
+    //console.log('Fetching genres...')
     const genres = await getAllGenresFromDB();
     const genresEnd = Date.now();
-    console.log(`Genre docs took ${genresEnd - genresStart}ms`);
+    //console.log(`Genre docs took ${genresEnd - genresStart}ms`);
     const linksStart = Date.now();
-    console.log('Generating links...')
+    //console.log('Generating links...')
     const links = await getGenreLinksFromDB();
     const linksEnd = Date.now();
-    console.log(`Genre links took ${linksEnd - linksStart}ms`);
+    //console.log(`Genre links took ${linksEnd - linksStart}ms`);
     return { genres, links };
     // return {
     //     genres: await getAllGenresFromDB(),

@@ -101,6 +101,8 @@ export interface Genre extends SimpleGenre {
     from?: string[];
     named_after_area?: string[];
     used_instruments?: string[];
+    rootGenres?: string[];
+    specificRootGenres?: RootGenreNode[];
     badDataFlag?: boolean;
     badDataReason?: string;
 }
@@ -120,7 +122,9 @@ export interface LastFMSearchArtistData extends BasicItem {
     listeners: number;
 }
 
-export type LinkType = 'subgenre' | 'influence' | 'fusion' | 'similar';
+export type GenreClusterMode = 'subgenre' | 'influence' | 'fusion';
+
+export type LinkType = GenreClusterMode | 'similar';
 
 export type ParentField = 'subgenre_of' | 'influenced_by' | 'fusion_of';
 
@@ -138,4 +142,9 @@ export interface BadDataReport {
     reason: string;
     resolved: boolean;
     details?: string;
+}
+
+export interface RootGenreNode {
+    id: string;
+    type: GenreClusterMode;
 }

@@ -1,8 +1,8 @@
 import {collections} from "../db/connection";
 import {getAllGenresFromDB, getGenreRoots} from "./getFromDB";
-import {getRootGenresOfGenre} from "../utils/rootGenres";
+import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
 import {ObjectId} from "mongodb";
-import {BadDataReport} from "../types";
+import {BadDataReport, Genre} from "../types";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -45,10 +45,30 @@ export async function flipBadDataArtist(artistID: string, reason: string) {
 
 export async function addRootsToGenres() {
     const genres = await getAllGenresFromDB();
+    //const genres2 = await collections.genres?.find({ id: 'd4b71a23-7dc0-4291-9a8d-a27d5dbbf9f2'}).toArray();
     if (genres) {
+        let i = 0;
+        const length = genres.length;
         for (const genre of genres) {
-            const roots = getRootGenresOfGenre(genre, genres);
-            await collections.genres?.updateOne({ id: genre.id }, [{$set: {rootGenres: roots }}]);
+            const comboRoots = getGeneralRootsOfGenre(genre as unknown as Genre, genres as unknown as Genre[], ['subgenre', 'fusion']);
+            await collections.genres?.updateOne({ id: genre.id }, [{$set: {rootGenres: comboRoots }}]);
+            i++;
+            console.log(`Updated roots for genre ${i}/${length}: ${genre.name}`);
+        }
+    }
+}
+
+export async function addSpecificRootsToGenres() {
+    const genres = await getAllGenresFromDB();
+    //const genres2 = await collections.genres?.find({ id: 'd4b71a23-7dc0-4291-9a8d-a27d5dbbf9f2'}).toArray();
+    if (genres) {
+        let i = 0;
+        const length = genres.length;
+        for (const genre of genres) {
+            const individualRoots = getSpecificRootsOfGenre(genre as unknown as Genre, genres);
+            await collections.genres?.updateOne({ id: genre.id }, [{$set: {specificRootGenres: individualRoots }}]);
+            i++;
+            console.log(`Updated specific roots for genre ${i}/${length}: ${genre.name}`);
         }
     }
 }

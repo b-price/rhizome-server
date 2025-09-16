@@ -4,7 +4,12 @@ import {
     getGenreNameFromID, getGenreRootsDoc,
     getGenreTreeFromParent
 } from "../controllers/getFromDB";
-import {addRootsToGenres, flipBadDataGenre, submitBadDataReport} from "../controllers/writeToDB";
+import {
+    addRootsToGenres,
+    addSpecificRootsToGenres,
+    flipBadDataGenre,
+    submitBadDataReport
+} from "../controllers/writeToDB";
 import {ParentField} from "../types";
 
 const router = express.Router();
@@ -49,13 +54,23 @@ router.get('/tree/roots', async (req, res) => {
     }
 });
 
-router.get('/tree/set', async (req, res) => {
+router.get('/tree/general', async (req, res) => {
     try {
         await addRootsToGenres();
         res.status(200).end();
     } catch (err) {
-        console.error('Failed to add genre roots:', err);
-        res.status(500).json({ error: 'Failed to add genre roots' });
+        console.error('Failed to add general genre roots:', err);
+        res.status(500).json({ error: 'Failed to add general genre roots' });
+    }
+});
+
+router.get('/tree/specific', async (req, res) => {
+    try {
+        await addSpecificRootsToGenres();
+        res.status(200).end();
+    } catch (err) {
+        console.error('Failed to add specific genre roots:', err);
+        res.status(500).json({ error: 'Failed to add specific genre roots' });
     }
 });
 
