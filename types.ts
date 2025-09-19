@@ -148,3 +148,21 @@ export interface RootGenreNode {
     id: string;
     type: GenreClusterMode;
 }
+
+export interface LastFMItem {
+    name: string;
+    id?: string;
+}
+
+export interface LastFMTrack extends LastFMItem {
+    url: string;
+    artist: LastFMItem;
+    duration?: number;
+    playcount?: number;
+    listeners?: number;
+}
+
+export interface YouTubeTrackData {
+    videoTitle: string;
+    id: string;
+}

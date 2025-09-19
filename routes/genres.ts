@@ -11,6 +11,7 @@ import {
     submitBadDataReport
 } from "../controllers/writeToDB";
 import {ParentField} from "../types";
+import {topTracksGenre} from "../controllers/lastFMTopTracks";
 
 const router = express.Router();
 
@@ -31,6 +32,16 @@ router.get('/:genreID', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch genre:', err);
         res.status(500).json({ error: 'Failed to fetch genre' });
+    }
+});
+
+router.get('/toptracks/:genrename', async (req, res) => {
+    try {
+        const topTracks = await topTracksGenre(req.params.genrename);
+        res.json(topTracks);
+    } catch (err) {
+        console.error('Failed to fetch top tracks:', err);
+        res.status(500).json({ error: 'Failed to fetch top tracks' });
     }
 });
 

@@ -7,6 +7,7 @@ import {
 import {flipBadDataArtist, submitBadDataReport} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
+import {topTracksArtist} from "../controllers/lastFMTopTracks";
 
 const router = express.Router();
 
@@ -56,6 +57,16 @@ router.get('/similar/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch similar artists:', err);
         res.status(500).json({ error: 'Failed to fetch similar artists' });
+    }
+});
+
+router.get('/toptracks/:id/:name', async (req, res) => {
+    try {
+        const topTracks = await topTracksArtist(req.params.id, req.params.name);
+        res.json(topTracks);
+    } catch (err) {
+        console.error('Failed to fetch top tracks:', err);
+        res.status(500).json({ error: 'Failed to fetch top tracks' });
     }
 });
 
