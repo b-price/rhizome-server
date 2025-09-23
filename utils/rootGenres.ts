@@ -19,6 +19,7 @@ export const CHILD_FIELD_MAP: {
     fusion: 'fusion_of',
 }
 
+// Returns the root genres of each type of heirarchy of a genre
 export function getSpecificRootsOfGenre(genre: Genre, allGenres: Genre[]) {
     if (genre.subgenre_of.length === 0
         && genre.fusion_of.length === 0
@@ -64,6 +65,7 @@ export function getSpecificRootsOfGenre(genre: Genre, allGenres: Genre[]) {
     });
 }
 
+// Returns the root genres of a genre given a list of heirarchy types
 export function getGeneralRootsOfGenre(genre: Genre, allGenres: Genre[], treeModes: GenreClusterMode[]) {
     if (treeModes.length === 0 || allGenres.length === 0) return [];
     let singleton = true;
