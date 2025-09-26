@@ -7,7 +7,7 @@ import {
 import {flipBadDataArtist, submitBadDataReport} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
-import {topTracksArtist} from "../controllers/lastFMTopTracks";
+import {topTrackArtists, topTracksArtist} from "../controllers/lastFMTopTracks";
 
 const router = express.Router();
 
@@ -112,7 +112,21 @@ router.get('/duplicates/all/dupes', async (req, res) => {
         console.error('Failed to fetch duplicate artists:', err);
         res.status(500).json({ error: 'Failed to fetch duplicate artists' });
     }
-})
+});
+
+router.post('/toptracks/multiple', async (req, res) => {
+    try {
+        const artists = req.body.artists;
+        if (!artists || !artists.length) {
+            throw new Error('Invalid parameter')
+        }
+        const ytIDs = await topTrackArtists(artists);
+        res.json(ytIDs);
+    } catch (err) {
+        console.error('Failed to fetch top tracks of artists:');
+        res.status(500).json({ error: 'Failed to fetch top tracks of artists' });
+    }
+});
 
 router.post('/:filter/:amount', async (req, res) => {
     try {

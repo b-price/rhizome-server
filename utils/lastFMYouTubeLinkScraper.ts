@@ -9,7 +9,7 @@ import * as cheerio from "cheerio";
 export async function scrapeLastFMYouTubeLink(url: string): Promise<string | undefined> {
     try {
         const response = await fetch(url, {
-            signal: AbortSignal.timeout(30000), // optional timeout
+            signal: AbortSignal.timeout(10000), // optional timeout
         });
 
         if (!response.ok) {
