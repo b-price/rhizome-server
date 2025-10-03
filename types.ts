@@ -29,6 +29,8 @@ export interface Artist extends BasicItem {
     image?: string;
     badDataFlag?: boolean;
     badDataReason?: string;
+    topTracks?: TopTrack[];
+    noTopTracks?: boolean;
 }
 
 export interface ArtistData extends BasicItem {
@@ -105,6 +107,7 @@ export interface Genre extends SimpleGenre {
     specificRootGenres?: RootGenreNode[];
     badDataFlag?: boolean;
     badDataReason?: string;
+    topArtists?: BasicItem[];
 }
 
 export type CacheValidity = 'valid' | 'stale' | 'notFound' | 'error';
@@ -165,4 +168,15 @@ export interface LastFMTrack extends LastFMItem {
 export interface YouTubeTrackData {
     videoTitle: string;
     id: string;
+}
+
+export interface TopTrack extends TopTrackPlayIDs{
+    title: string;
+    artistName: string;
+}
+
+export interface TopTrackPlayIDs {
+    youtube?: string;
+    spotify?: string;
+    apple?: string;
 }

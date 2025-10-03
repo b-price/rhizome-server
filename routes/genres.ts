@@ -12,6 +12,7 @@ import {
 } from "../controllers/writeToDB";
 import {ParentField} from "../types";
 import {topTracksGenre} from "../controllers/lastFMTopTracks";
+import {printAllGenres} from "../testrunners/printAllGenres";
 
 const router = express.Router();
 
@@ -78,6 +79,18 @@ router.get('/tree/general', async (req, res) => {
 router.get('/tree/specific', async (req, res) => {
     try {
         await addSpecificRootsToGenres();
+        res.status(200).end();
+    } catch (err) {
+        console.error('Failed to add specific genre roots:', err);
+        res.status(500).json({ error: 'Failed to add specific genre roots' });
+    }
+});
+
+router.get('/print/:amount/:fields', async (req, res) => {
+    try {
+        const fields = req.params.fields === 'true';
+        const amount = parseInt(req.params.amount);
+        await printAllGenres(amount, undefined, fields)
         res.status(200).end();
     } catch (err) {
         console.error('Failed to add specific genre roots:', err);

@@ -1,11 +1,13 @@
 import axios from "axios";
-import {BasicItem, LastFMTrack} from "../types";
-import {scrapeLastFMYouTubeLink} from "../utils/lastFMYouTubeLinkScraper";
-import {getTopTrackOfArtistYT} from "./youTubeTopTracks";
+import {BasicItem, LastFMTrack, TopTrack} from "../types";
+import {scrapeLastFMPlayLink} from "../utils/lastFMPlayLinkScraper";
+import {getYoutubeTrackID} from "./youTubeTopTracks";
+import {getSpotifyTrackID} from "./spotifyTopTracks";
 
 const BASE_URL = `${process.env.LASTFM_URL}?method=`;
 const URL_CONFIG = `&api_key=${process.env.LASTFM_API_KEY}&format=json`;
 
+// Not used (top tracks of each top artist in the genre are used instead)
 async function getTopTracksOfGenreLFM(genreName: string) {
     try {
         const res = await axios.get(`${BASE_URL}tag.gettoptracks&tag=${encodeURIComponent(genreName)}${URL_CONFIG}`);
@@ -29,6 +31,7 @@ async function getTopTracksOfGenreLFM(genreName: string) {
     }
 }
 
+// Uses the Last.fm api to get the top tracks of an artist
 async function getTopTracksOfArtistLFM(artistID: string, artistName: string) {
     try {
         //const start = Date.now();
@@ -65,63 +68,139 @@ async function getTopTracksOfArtistLFM(artistID: string, artistName: string) {
     }
 }
 
-async function getTopTracksYouTubeIDs(lfmURLs: string[], amount: number) {
+// Scrapes youtube/spotify/apple music song IDs from last.fm track page if present
+async function getTopTracksPlayIDsLFM(trackData: { title: string, artistName: string, lfmUrl: string }[], amount: number) {
     //const start = Date.now();
-    const count = Math.min(lfmURLs.length, amount);
-    const urls = [];
+    const count = Math.min(trackData.length, amount);
+    const urls: Promise<TopTrack | undefined>[] = [];
     for (let i = 0; i < count; i++) {
-        urls.push(scrapeLastFMYouTubeLink(lfmURLs[i]));
+        urls.push(scrapeLastFMPlayLink(trackData[i].title, trackData[i].artistName, trackData[i].lfmUrl));
     }
     //const end = Date.now();
     //console.log(`${end - start}ms.`)
-    return await Promise.all(urls).then(ytIDs => ytIDs.filter(y => y !== undefined).map(t => t.split('v=')[1]));
+    return await Promise.all(urls).then(playIDs => playIDs.filter(t => t !== undefined));
 }
 
-export async function topTracksArtist(artistID: string, artistName: string, amount = 5) {
+// Attempts to retrieve track IDs of and artist's top tracks for Youtube, Spotify, and Apple Music, first by scraping Last.fm, then by searching using yt/sp apis
+export async function topTracksArtist(
+    artistID: string,
+    artistName: string,
+    amount = 5
+) {
     const tracks = await getTopTracksOfArtistLFM(artistID, artistName);
-    let urls: string[] = [];
-    if (tracks.length) {
-        urls = await getTopTracksYouTubeIDs(tracks.map(t => t.url), amount);
-        if (!urls.length) {
-            const ytIDs: string[] = [];
-            for (let i = 0; i < Math.min(amount, tracks.length); i++) {
-                // const url = getTopTrackOfArtistYT(artistName, tracks[i].name);
-                // if (url) urls.push(url);
-                getTopTrackOfArtistYT(artistName, tracks[i].name).then(url => url ? ytIDs.push(url) : url);
-            }
-            Promise.all(ytIDs).then(ids => urls.push(...ids));
-        }
+    if (!tracks?.length) {
+        console.log('       no top tracks found');
+        return [];
     }
-    return urls;
+
+    const top = tracks.slice(0, amount);
+
+    // Try scraping play IDs from last.fm track pages first
+    let tracksIDs: TopTrack[] = await getTopTracksPlayIDsLFM(
+        top.map(t => ({ title: t.name, artistName: t.artist.name, lfmUrl: t.url })),
+        amount
+    );
+
+    if (!tracksIDs?.length) {
+        // Fallback: build the list from scratch by searching YT + Spotify in parallel for each track
+        console.log('       no links found')
+        const results = await Promise.all(
+            top.map(async t => {
+                const { youtube, spotify } = await fetchPlatforms(artistName, t.name);
+                // Only include if at least one platform was found
+                return youtube || spotify
+                    ? { artistName, title: t.name, youtube, spotify } as TopTrack
+                    : undefined;
+            })
+        );
+
+        tracksIDs = results.filter((x): x is TopTrack => Boolean(x));
+    } else {
+        // Fill any missing yt/sp ids
+        tracksIDs = await fillMissingIDs(tracksIDs);
+    }
+
+    return tracksIDs;
 }
 
+// Unused
 export async function topTrackArtists(artists: BasicItem[], retries = 3) {
-    const tracks = [];
-    for (const artist of artists) {
-        //const start = Date.now();
-        //let neededBackup = false;
-        const artistTracks = await getTopTracksOfArtistLFM(artist.id, artist.name);
-        let url = [];
-        if (artistTracks.length) {
-            url = await getTopTracksYouTubeIDs(artistTracks.map(t => t.url), retries);
-            if (!url.length) {
-                //neededBackup = true;
-                const ytURL = await getTopTrackOfArtistYT(artist.name, artistTracks[0].name);
-                if (ytURL) url.push(ytURL);
+    const tracks = await Promise.all(
+        artists.map(async artist => {
+            //const start = Date.now();
+            //let neededBackup = false;
+            const artistTracks = await getTopTracksOfArtistLFM(artist.id, artist.name);
+            let url = [];
+            if (artistTracks.length) {
+                const artistName = artist.name;
+                const title = artistTracks[0].name;
+                url = await getTopTracksPlayIDsLFM(artistTracks.map(t => {
+                    return { title: t.name, artistName: t.artist.name, lfmUrl: t.url }
+                }), retries);
+                if (!url.length) {
+                    //neededBackup = true;
+                    const backups = await fetchPlatforms(artist.name, artistTracks[0].name);
+                    // const ytURL = await getTopTrackOfArtistYT(artist.name, artistTracks[0].name);
+                    // if (ytURL) url.push({title: artistTracks[0].name, artistName: artist.name, youtube: ytURL});
+                    if (backups.youtube || backups.spotify) {
+                        url.push({ title: artistTracks[0].name, artistName: artist.name, youtube: backups.youtube, spotify: backups.spotify });
+                    }
+                } else {
+                    url = await fillMissingIDs([url[0]]);
+                }
+                return url.length ? url[0] : undefined;
             }
-            if (url.length) tracks.push(url[0]);
-        }
+        })
+    );
         //const end = Date.now();
         //console.log(`${artist.name} took ${end - start}ms. Needed backup: ${neededBackup}`)
-    }
     return tracks;
 }
 
+// Searches YT and Spotify in parallel for play IDs
+const fetchPlatforms = async (artist: string, title: string) => {
+    const [yt, sp] = await Promise.allSettled([
+        getYoutubeTrackID(artist, title),
+        getSpotifyTrackID(artist, title),
+    ]);
+
+    return {
+        youtube: yt.status === "fulfilled" ? yt.value : undefined,
+        spotify: sp.status === "fulfilled" ? sp.value : undefined,
+    };
+};
+
+// Fills missing play IDs for an array of TopTracks
+const fillMissingIDs = async (tracks: TopTrack[]) => {
+    return await Promise.all(
+        tracks.map(async track => {
+            const needsYT = !track.youtube;
+            const needsSP = !track.spotify;
+
+            if (!needsYT && !needsSP) return track;
+            if (needsYT) console.log('      missing yt')
+            if (needsSP) console.log('      missing sp')
+            // Fetch only what’s missing (still runs both concurrently if both missing)
+            const [yt, sp] = await Promise.allSettled([
+                needsYT ? getYoutubeTrackID(track.artistName, track.title) : Promise.resolve(track.youtube),
+                needsSP ? getSpotifyTrackID(track.artistName, track.title) : Promise.resolve(track.spotify),
+            ]);
+
+            return {
+                ...track,
+                youtube: yt.status === "fulfilled" ? yt.value : track.youtube,
+                spotify: sp.status === "fulfilled" ? sp.value : track.spotify,
+            };
+        })
+    );
+}
+
+// Unused
 export async function topTracksGenre(genreName: string, amount = 5) {
     const tracks = await getTopTracksOfGenreLFM(genreName);
     let urls: string[] = [];
-    if (tracks.length) {
-        urls = await getTopTracksYouTubeIDs(tracks.map(t => t.url), amount);
-    }
+    // if (tracks.length) {
+    //     urls = await getTopTracksPlayIDs(tracks.map(t => t.url), amount);
+    // }
     return urls;
 }

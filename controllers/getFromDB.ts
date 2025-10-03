@@ -1,5 +1,5 @@
 import {collections} from "../db/connection";
-import {Artist, Genre, ParentField, LinkType, FilterField} from "../types";
+import {Artist, Genre, ParentField, LinkType, FilterField, BasicItem} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 import {ObjectId} from "mongodb";
 
@@ -37,12 +37,12 @@ export async function getGenreArtistData(genreID: string) {
     }
 }
 
-export async function getTopArtists(genreID: string, amount: number) {
-    const genreName = await collections.genres?.findOne({id: genreID}, {projection: {name: 1, _id: 0}});
-    if (genreName) {
+export async function getTopArtists(genreID: string, amount: number, genreName?: string) {
+    const name = genreName ? { name: genreName } : await collections.genres?.findOne({id: genreID}, {projection: {name: 1, _id: 0}});
+    if (name) {
         return await collections.artists?.aggregate([
             // Only keep artists that actually have the genre tag
-            { $match: { "tags.name": genreName.name } },
+            { $match: { "tags.name": name.name } },
 
             // Add a field with just the matching tag
             {
@@ -53,7 +53,7 @@ export async function getTopArtists(genreID: string, amount: number) {
                                 $filter: {
                                     input: "$tags",
                                     as: "t",
-                                    cond: { $eq: ["$$t.name", genreName.name] }
+                                    cond: { $eq: ["$$t.name", name.name] }
                                 }
                             },
                             0

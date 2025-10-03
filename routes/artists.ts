@@ -4,7 +4,7 @@ import {
     getGenreArtistData, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist, getTopArtists
 } from "../controllers/getFromDB";
-import {flipBadDataArtist, submitBadDataReport} from "../controllers/writeToDB";
+import {flipBadDataArtist, submitBadDataReport, updateArtistTopTracks} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
 import {topTrackArtists, topTracksArtist} from "../controllers/lastFMTopTracks";
@@ -62,7 +62,10 @@ router.get('/similar/:id', async (req, res) => {
 
 router.get('/toptracks/:id/:name', async (req, res) => {
     try {
-        const topTracks = await topTracksArtist(req.params.id, req.params.name);
+        //const start = Date.now();
+        const topTracks = await updateArtistTopTracks(req.params.id, req.params.name);
+        //const end = Date.now();
+        //console.log(`Took ${end - start}ms`)
         res.json(topTracks);
     } catch (err) {
         console.error('Failed to fetch top tracks:', err);

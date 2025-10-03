@@ -1,8 +1,11 @@
 import {collections} from "../db/connection";
-import {getAllGenresFromDB, getGenreRoots} from "./getFromDB";
+import {getAllGenresFromDB, getGenreRoots, getTopArtists} from "./getFromDB";
 import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
 import {ObjectId} from "mongodb";
-import {BadDataReport, Genre} from "../types";
+import {BadDataReport, Genre, TopTrack} from "../types";
+import {topTracksArtist} from "./lastFMTopTracks";
+import {getYoutubeTrackID} from "./youTubeTopTracks";
+import {getSpotifyTrackID} from "./spotifyTopTracks";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -98,4 +101,121 @@ async function setBadDataGenre(genreID: string) {
 
 async function setBadDataArtist(artistID: string) {
     await collections.artists?.updateOne({ id: artistID }, [{ $set: { badDataFlag: true } }]);
+}
+
+export async function updateArtistTopTracks(artistID: string, artistName: string, amount = 8) {
+    const topTracks = await topTracksArtist(artistID, artistName, amount);
+    if (topTracks.length) {
+        await collections.artists?.updateOne({ id: artistID }, [{ $set: { topTracks: topTracks } }]);
+    } else {
+        await collections.artists?.updateOne({ id: artistID }, [{ $set: { noTopTracks: true } }])
+    }
+    return topTracks;
+}
+
+async function updateGenreTopArtists(genreID: string, amount: number,  genreName?: string) {
+    const topArtists = await getTopArtists(genreID, amount, genreName);
+    if (topArtists && topArtists.length) {
+        //console.log(genreName)
+        await collections.genres?.updateOne({ id: genreID }, { $set: { topArtists: topArtists.map(a => {
+            return { id: a.id, name: a.name };
+        }) } });
+    }
+}
+
+export async function addTopArtistsToGenres() {
+    const genres = await getAllGenresFromDB();
+    if (genres) {
+        console.log('Adding top artists to genres...');
+        await Promise.all(genres.map((genre) => {updateGenreTopArtists(genre.id, 8, genre.name)}));
+        console.log('Complete!');
+    }
+}
+
+export async function addTopTracksToAllGenreTopArtists() {
+    const genres = await getAllGenresFromDB();
+    if (genres) {
+        let i = 0;
+        const count = genres.length;
+        for (const genre of genres.slice(i)) {
+            i++;
+            console.log(`Genre ${i}/${count}: ${genre.name}`);
+            if (genre.topArtists) {
+                for (const topArtist of genre.topArtists) {
+                    const topArtistData = await collections.artists?.findOne(
+                        {
+                            id: topArtist.id,
+                            topTracks: { $exists: true, $ne: [] }
+                        },
+                        //{ projection: { _id: 0, id: 1 } }
+                    );
+                    if (!topArtistData) {
+                        console.log(`   Adding top tracks for ${topArtist.name}`);
+                        await updateArtistTopTracks(topArtist.id, topArtist.name, 5);
+                    } else {
+                        if (topArtistData.noTopTracks) continue;
+                        let changed = false;
+                        const newTracks = [];
+                        for (const track of topArtistData.topTracks) {
+                            const ytID = track.youtube ? undefined : await getYoutubeTrackID(topArtist.name, track.title);
+                            const spID = track.spotify ? undefined : await getSpotifyTrackID(topArtist.name, track.title);
+                            if (ytID || spID) changed = true;
+                            newTracks.push({
+                                ...track,
+                                youtube: ytID ? ytID : track.youtube,
+                                spotify: spID ? spID : track.spotify,
+                            });
+                        }
+                        if (changed) {
+                            console.log(`  Found new ids for ${topArtist.name}`);
+                            await collections.artists?.updateOne({ id: topArtist.id }, [{ $set: { topTracks: newTracks } }]);
+                        }
+                        // runs YT + Spotify in parallel per track, and all tracks in parallel
+                        // const results = await Promise.all(
+                        //     hasTopTracks.topTracks.map(async (track: TopTrack) => {
+                        //         // only fetch what’s missing; keep existing values
+                        //         const ytP = track.youtube
+                        //             ? Promise.resolve(track.youtube)
+                        //             : getYoutubeTrackID(topArtist.name, track.title);
+                        //
+                        //         const spP = track.spotify
+                        //             ? Promise.resolve(track.spotify)
+                        //             : getSpotifyTrackID(topArtist.name, track.title);
+                        //
+                        //         const [yt, sp] = await Promise.allSettled([ytP, spP]);
+                        //
+                        //         const newYoutube =
+                        //             track.youtube ?? (yt.status === "fulfilled" ? yt.value : undefined);
+                        //         const newSpotify =
+                        //             track.spotify ?? (sp.status === "fulfilled" ? sp.value : undefined);
+                        //
+                        //         const trackChanged =
+                        //             newYoutube !== track.youtube || newSpotify !== track.spotify;
+                        //
+                        //         return {
+                        //             ...track,
+                        //             youtube: newYoutube,
+                        //             spotify: newSpotify,
+                        //             __changed: trackChanged,
+                        //         };
+                        //     })
+                        // );
+                        //
+                        // const newTracks = results.map(({ __changed, ...t }) => t);
+                        // const changed = results.some(r => (r as any).__changed);
+                        //
+                        // if (changed) {
+                        //     console.log(`  Found new ids for ${topArtist.name}`);
+                        //     await collections.artists?.updateOne(
+                        //         { id: topArtist.id },
+                        //         [{ $set: { topTracks: newTracks } }] // keep your pipeline-style update
+                        //         // or: { $set: { topTracks: newTracks } } // regular update is fine too
+                        //     );
+                        // }
+
+                    }
+                }
+            }
+        }
+    }
 }

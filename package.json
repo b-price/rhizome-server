@@ -13,12 +13,14 @@
   "description": "",
   "dependencies": {
     "@google/genai": "^1.13.0",
+    "@yimura/scraper": "^1.2.4",
     "axios": "^1.10.0",
     "cheerio": "^1.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "mongodb": "^6.18.0"
+    "mongodb": "^6.18.0",
+    "scrape-youtube": "^2.4.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -1,5 +1,7 @@
 import axios, {AxiosError} from "axios";
 import {YouTubeTrackData} from "../types";
+import {scrapeYouTubeID} from "../utils/youtubeScraper";
+import {Scraper} from '@yimura/scraper';
 
 const YT_KEY = process.env.YOUTUBE_API_KEY;
 const YT_KEY_BACKUP = process.env.YOUTUBE_API_KEY_BACKUP;
@@ -8,6 +10,22 @@ const MUSIC_YT_CATEGORY = 10;
 const BASE_URL = 'https://www.googleapis.com/youtube/v3/search?part=id&maxResults=';
 const URL_CONFIG = `&safeSearch=none&type=video&videoCategoryId=${MUSIC_YT_CATEGORY}&videoEmbeddable=true&key=`;
 
+const randomDelay = (delay: number, rangeFactor = 2) => {
+    const lower = Math.floor(Math.min(1, delay / rangeFactor));
+    const upper = Math.floor(delay * rangeFactor);
+    return Math.floor(Math.random() * (upper - lower));
+}
+
+function sleep(ms: number) {
+    return new Promise((r) => setTimeout(r, ms));
+}
+
+/**
+ * Tries to get the YouTube IDs of top tracks of an artist without knowing the tracks. Not reliable.
+ * @param artistName
+ * @param additional
+ * @param amount
+ */
 export async function getTopTracksOfArtistYT(artistName: string, additional = '', amount = 5) {
     try {
         const query = additional ? `${artistName} ${additional}` : artistName;
@@ -45,7 +63,12 @@ async function fetchTopTrack(query: string, apiKey: string) {
     }
 }
 
-export async function getTopTrackOfArtistYT(artistName: string, trackName: string) {
+/**
+ * Searches YouTube for a song and gets its ID. Tries with YT api first, then with scraping
+ * @param artistName
+ * @param trackName
+ */
+export async function getYoutubeTrackID(artistName: string, trackName: string) {
     const query = encodeURIComponent(`${artistName} ${trackName}`);
     const keys = [YT_KEY, YT_KEY_BACKUP, YT_KEY_BACKUP_2].filter(Boolean) as string[];
 
@@ -55,6 +78,19 @@ export async function getTopTrackOfArtistYT(artistName: string, trackName: strin
         if (res && res.status !== 403) {
             break; // success or a different error (don’t try more keys)
         }
+    }
+
+    // We have hit the extremely meager YT search limit on all our keys, resort to scraping
+    if (res.status === 403) {
+        console.log('   yt 403, trying scrape...');
+        try {
+            await sleep(randomDelay(2876, 3));
+            return await scrapeYouTubeID(artistName, trackName);
+        } catch (err) {
+            console.error('Error scraping yt: ', err);
+        }
+
+        //throw new Error('YT quota reached or access error.');
     }
 
     if (!res || res.status !== 200) {
@@ -68,3 +104,7 @@ export async function getTopTrackOfArtistYT(artistName: string, trackName: strin
     }
     return ytID;
 }
+
+// if (require.main === module) {
+//     scrapeYoutube('sepultura', 'arise').then(r => console.log(r))
+// }
