@@ -103,7 +103,7 @@ async function setBadDataArtist(artistID: string) {
     await collections.artists?.updateOne({ id: artistID }, [{ $set: { badDataFlag: true } }]);
 }
 
-export async function updateArtistTopTracks(artistID: string, artistName: string, amount = 8) {
+export async function updateArtistTopTracks(artistID: string, artistName: string, amount = 5) {
     const topTracks = await topTracksArtist(artistID, artistName, amount);
     if (topTracks.length) {
         await collections.artists?.updateOne({ id: artistID }, [{ $set: { topTracks: topTracks } }]);
