@@ -525,3 +525,7 @@ export async function getDuplicateArtists() {
         { $match: { duplicateCount: { $gt: 1 } } },
         { $project: { duplicateCount: 0 } }]).toArray();
 }
+
+export async function getUserData(id: string) {
+    return await collections.users?.findOne({ id: id });
+}

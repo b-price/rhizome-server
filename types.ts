@@ -1,3 +1,5 @@
+import {ObjectId} from "mongodb";
+
 export interface BasicItem {
     id: string;
     name: string;
@@ -179,4 +181,26 @@ export interface TopTrackPlayIDs {
     youtube?: string;
     spotify?: string;
     apple?: string;
+}
+
+export interface ArtistLike {
+    id: string;
+    date: Date;
+}
+
+export interface Preferences {
+    theme?: 'light' | 'dark' | 'system';
+    player?: 'youtube' | 'spotify' | 'apple';
+}
+
+export interface User {
+    id: string;
+    liked: ArtistLike[];
+    preferences: Preferences;
+}
+
+export interface Feedback {
+    text: string;
+    email?: string;
+    userID?: string;
 }
