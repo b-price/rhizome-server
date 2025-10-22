@@ -1,6 +1,11 @@
 import express from "express";
 import {getUserData} from "../controllers/getFromDB";
-import {addUserLikedArtist, removeUserLikedArtist, updateUserPreferences} from "../controllers/writeToDB";
+import {
+    addUserLikedArtist,
+    removeUserLikedArtist,
+    submitFeedback,
+    updateUserPreferences
+} from "../controllers/writeToDB";
 
 const router = express.Router();
 
@@ -11,6 +16,19 @@ router.get('/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch user:', err);
         res.status(500).json({ error: 'Failed to fetch user' });
+    }
+});
+
+router.post('/feedback', async (req, res) => {
+    try {
+        if (!req.body.feedback) {
+            throw new Error('Invalid feedback format');
+        }
+        await submitFeedback(req.body.feedback);
+        res.status(200).json({ message: 'Submitted feedback' });
+    } catch (err) {
+        console.error('Failed to submit feedback:', err);
+        res.status(500).json({ error: 'Failed to submit feedback' });
     }
 });
 

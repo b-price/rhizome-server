@@ -202,6 +202,7 @@ export interface User {
 
 export interface Feedback {
     text: string;
+    userID: string;
     email?: string;
-    userID?: string;
+    resolved: boolean;
 }

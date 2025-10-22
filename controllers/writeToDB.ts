@@ -2,7 +2,7 @@ import {collections} from "../db/connection";
 import {getAllGenresFromDB, getGenreRoots, getTopArtists} from "./getFromDB";
 import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
 import {ObjectId, PushOperator} from "mongodb";
-import {BadDataReport, Genre, Preferences, TopTrack} from "../types";
+import {BadDataReport, Feedback, Genre, Preferences, TopTrack} from "../types";
 import {topTracksArtist} from "./lastFMTopTracks";
 import {getYoutubeTrackID} from "./youTubeTopTracks";
 import {getSpotifyTrackID} from "./spotifyTopTracks";
@@ -242,4 +242,8 @@ export async function removeUserLikedArtist(userID: string, artistID: string) {
 
 export async function updateUserPreferences(id: string, preferences: Preferences) {
     await collections.users?.updateOne( { id: id }, { $set: { preferences: preferences } });
+}
+
+export async function submitFeedback(feedback: Feedback) {
+    await collections.feedback?.insertOne(feedback);
 }
