@@ -4,5 +4,6 @@ data/genreArtists
 data/artists
 data/genres/old
 data/genres/rawData
+data/exampleSchema
 .env
 dist

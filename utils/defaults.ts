@@ -5,4 +5,4 @@ export const DEFAULT_USER_PREFERENCES: Preferences = {
     player: 'youtube',
 }
 
-export const FRONTEND_DEPLOYMENT_URL = 'rizhome.vercel.app';
+export const ADMIN_EMAIL = 'admin@rhizome.fyi';

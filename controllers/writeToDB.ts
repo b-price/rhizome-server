@@ -221,8 +221,8 @@ export async function addTopTracksToAllGenreTopArtists() {
     }
 }
 
-export async function createUserData(id: string) {
-    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES });
+export async function createUserData(id: string, socialUser?: boolean) {
+    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser: socialUser });
 }
 
 export async function deleteUserData(id: string) {
@@ -230,7 +230,10 @@ export async function deleteUserData(id: string) {
 }
 
 export async function addUserLikedArtist(userID: string, artistID: string) {
-    await collections.users?.updateOne({ id: userID }, { $push: { liked: { id: artistID, date: new Date() } } as unknown as PushOperator<Document> });
+    await collections.users?.updateOne(
+        { id: userID, "liked.id": { $ne: artistID }  },
+        { $push: { liked: { id: artistID, date: new Date() } } as unknown as PushOperator<Document> }
+    );
 }
 
 export async function removeUserLikedArtist(userID: string, artistID: string) {

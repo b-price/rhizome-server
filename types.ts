@@ -197,6 +197,7 @@ export interface User {
     id: string;
     liked: ArtistLike[];
     preferences: Preferences;
+    socialUser?: boolean;
 }
 
 export interface Feedback {
