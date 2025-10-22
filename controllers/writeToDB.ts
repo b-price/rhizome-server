@@ -1,11 +1,12 @@
 import {collections} from "../db/connection";
 import {getAllGenresFromDB, getGenreRoots, getTopArtists} from "./getFromDB";
 import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
-import {ObjectId} from "mongodb";
-import {BadDataReport, Genre, TopTrack} from "../types";
+import {ObjectId, PushOperator} from "mongodb";
+import {BadDataReport, Genre, Preferences, TopTrack} from "../types";
 import {topTracksArtist} from "./lastFMTopTracks";
 import {getYoutubeTrackID} from "./youTubeTopTracks";
 import {getSpotifyTrackID} from "./spotifyTopTracks";
+import {DEFAULT_USER_PREFERENCES} from "../utils/defaults";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -218,4 +219,27 @@ export async function addTopTracksToAllGenreTopArtists() {
             }
         }
     }
+}
+
+export async function createUserData(id: string, socialUser?: boolean) {
+    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser: socialUser });
+}
+
+export async function deleteUserData(id: string) {
+    await collections.users?.deleteOne({ id: id });
+}
+
+export async function addUserLikedArtist(userID: string, artistID: string) {
+    await collections.users?.updateOne(
+        { id: userID, "liked.id": { $ne: artistID }  },
+        { $push: { liked: { id: artistID, date: new Date() } } as unknown as PushOperator<Document> }
+    );
+}
+
+export async function removeUserLikedArtist(userID: string, artistID: string) {
+    await collections.users?.updateOne({ id: userID }, { $pull: { liked: { id: artistID } } as unknown as PushOperator<Document> });
+}
+
+export async function updateUserPreferences(id: string, preferences: Preferences) {
+    await collections.users?.updateOne( { id: id }, { $set: { preferences: preferences } });
 }

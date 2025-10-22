@@ -1,7 +1,7 @@
 import express from "express";
 import {
     getArtistByName, getArtistDataFiltered, getDuplicateArtists,
-    getGenreArtistData, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
+    getGenreArtistData, getMultipleArtists, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist, getTopArtists
 } from "../controllers/getFromDB";
 import {flipBadDataArtist, submitBadDataReport, updateArtistTopTracks} from "../controllers/writeToDB";
@@ -138,6 +138,20 @@ router.post('/:filter/:amount', async (req, res) => {
             throw new Error('Invalid parameter')
         }
         const artistData = await getMultipleGenresArtistsData(req.params.filter as FilterField, parseInt(req.params.amount), genres);
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists from genres:', err);
+        res.status(500).json({ error: 'Failed to fetch artists from genres' });
+    }
+});
+
+router.post('/multiple', async (req, res) => {
+    try {
+        const artists = req.body.artists;
+        if (!artists || !artists.length) {
+            throw new Error('Invalid artist ID list')
+        }
+        const artistData = await getMultipleArtists(artists);
         res.json(artistData);
     } catch (err) {
         console.error('Failed to fetch artists from genres:', err);
