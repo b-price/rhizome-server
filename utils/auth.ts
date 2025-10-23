@@ -86,12 +86,12 @@ export const auth = () => betterAuth({
                     httpOnly: true,
                 }
             },
-            // state: {
-            //     attributes: {
-            //         sameSite: "none",
-            //         secure: true,
-            //     }
-            // }
+            state: {
+                attributes: {
+                    sameSite: "none",
+                    secure: true,
+                }
+            }
         }
     },
 });
