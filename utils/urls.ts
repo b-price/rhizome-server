@@ -1,9 +1,12 @@
+export const SERVER_PROD_URL = 'https://rhizome-server-production.up.railway.app';
+export const SERVER_DEV_URL = 'https://rhizome-server-development.up.railway.app';
+
 export const serverUrl = process.env.SERVER === 'production'
-    ? 'https://rhizome-server-production.up.railway.app'
+    ? process.env.CLIENT === 'production' ? SERVER_PROD_URL : SERVER_DEV_URL
     : 'http://localhost:3000';
 
 export const ngrokUrl = process.env.SERVER === 'production'
-    ? 'https://rhizome-server-production.up.railway.app'
+    ? process.env.CLIENT === 'production' ? SERVER_PROD_URL : SERVER_DEV_URL
     : 'https://sinuous-unconstantly-dede.ngrok-free.dev';
 
 export const FRONTEND_DEPLOYMENT_URL = 'https://www.rhizome.fyi';
