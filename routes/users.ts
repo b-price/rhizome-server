@@ -25,7 +25,7 @@ router.post('/feedback', async (req, res) => {
             throw new Error('Invalid feedback format');
         }
         await submitFeedback(req.body.feedback);
-        res.status(200).json({ message: 'Submitted feedback' });
+        res.status(200).json({ message: 'Submitted feedback.' });
     } catch (err) {
         console.error('Failed to submit feedback:', err);
         res.status(500).json({ error: 'Failed to submit feedback' });
