@@ -78,13 +78,20 @@ export const auth = () => betterAuth({
     advanced: {
         //useSecureCookies: true,
         cookiePrefix: "rhizome",
-        // cookies: {
-        //     state: {
-        //         attributes: {
-        //             sameSite: "none",
-        //             secure: true,
-        //         }
-        //     }
-        // }
+        cookies: {
+            session_token: {
+                attributes: {
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                }
+            },
+            // state: {
+            //     attributes: {
+            //         sameSite: "none",
+            //         secure: true,
+            //     }
+            // }
+        }
     },
 });
