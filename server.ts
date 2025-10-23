@@ -9,7 +9,7 @@ import users from "./routes/users";
 import {connectDB} from "./db/connection";
 import {auth} from "./utils/auth";
 import { toNodeHandler } from "better-auth/node";
-import {FRONTEND_DEPLOYMENT_URL} from "./utils/urls";
+import {frontend_url} from "./utils/urls";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +22,7 @@ connectDB().then(v => {
 
 app.use(express.json());
 app.use(cors({
-    origin: FRONTEND_DEPLOYMENT_URL,
+    origin: frontend_url,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
 }));

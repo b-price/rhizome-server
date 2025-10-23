@@ -8,3 +8,5 @@ export const ngrokUrl = process.env.SERVER === 'production'
 
 export const FRONTEND_DEPLOYMENT_URL = 'https://www.rhizome.fyi';
 export const FRONTEND_LOCALHOST = 'http://localhost:5173';
+
+export const frontend_url = process.env.CLIENT === 'production' ? FRONTEND_DEPLOYMENT_URL : FRONTEND_LOCALHOST;
