@@ -16,13 +16,13 @@ export const auth = () => betterAuth({
             await sendEmail({
                 to: user.email,
                 from: ADMIN_EMAIL,
-                subject: 'Reset your password',
-                text: `Click the link to reset your password: ${url}`
+                subject: 'Reset your Rhizome password',
+                text: `Click the link to reset your password: ${url}. \n\nIf this wasn't you, you can safely ignore this email.`
             });
         },
-        onPasswordReset: async ({ user }, request) => {
-            console.log(`Password for user ${user.email} has been reset.`);
-        },
+        // onPasswordReset: async ({ user }, request) => {
+        //     console.log(`Password for user ${user.email} has been reset.`);
+        // },
     },
     socialProviders: {
         google: {
