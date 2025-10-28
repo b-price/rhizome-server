@@ -1,6 +1,6 @@
 import express from "express";
 import {
-    getArtistByName, getArtistDataFiltered, getDuplicateArtists,
+    getArtistByName, getArtistDataFiltered, getArtistFromID, getDuplicateArtists,
     getGenreArtistData, getMultipleArtists, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
     getSimilarArtistsFromArtist, getTopArtists
 } from "../controllers/getFromDB";
@@ -43,6 +43,16 @@ router.get('/:filter/:amount', async (req, res) => {
 router.get('/name/:name', async (req, res) => {
     try {
         const artist = getArtistByName(req.params.name);
+        res.json(artist);
+    } catch (err) {
+        console.error('Failed to fetch artist:', err);
+        res.status(500).json({ error: 'Failed to fetch artist' });
+    }
+});
+
+router.get('/id/:id', async (req, res) => {
+    try {
+        const artist = getArtistFromID(req.params.id);
         res.json(artist);
     } catch (err) {
         console.error('Failed to fetch artist:', err);

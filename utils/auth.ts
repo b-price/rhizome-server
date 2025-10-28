@@ -17,7 +17,7 @@ export const auth = () => betterAuth({
                 to: user.email,
                 from: ADMIN_EMAIL,
                 subject: 'Reset your Rhizome password',
-                text: `Click the link to reset your password: ${url}. \n\nIf this wasn't you, you can safely ignore this email.`
+                text: `Click the link to reset your password: ${url}. \nIf this wasn't you, you can safely ignore this email.`
             });
         },
         // onPasswordReset: async ({ user }, request) => {
