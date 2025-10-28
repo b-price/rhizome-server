@@ -50,7 +50,7 @@ router.get('/name/:name', async (req, res) => {
     }
 });
 
-router.get('/id/:id', async (req, res) => {
+router.get('/fetchbyid/:id', async (req, res) => {
     try {
         const artist = getArtistFromID(req.params.id);
         res.json(artist);
