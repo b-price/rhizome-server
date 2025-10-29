@@ -11,6 +11,7 @@ import {topTrackArtists, topTracksArtist} from "../controllers/lastFMTopTracks";
 
 const router = express.Router();
 
+// Fetches all artists of the genre
 router.get('/:genreID', async (req, res) => {
     try {
         // const startMem = memoryUsage.rss();
