@@ -125,7 +125,7 @@ export async function getGenreNameFromID(genreID: string) {
 }
 
 export async function getArtistFromID(id: string) {
-    return await collections.artists?.findOne({ id });
+    return await collections.artists?.findOne({ id: id });
 }
 
 export async function getSimilarArtistsFromArray(artists: string[]) {

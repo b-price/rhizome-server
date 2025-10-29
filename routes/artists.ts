@@ -27,6 +27,16 @@ router.get('/:genreID', async (req, res) => {
     }
 });
 
+router.get('/fetch/id/:id', async (req, res) => {
+    try {
+        const artist = await getArtistFromID(req.params.id);
+        res.json(artist);
+    } catch (err) {
+        console.error('Failed to fetch artist:', err);
+        res.status(500).json({ error: 'Failed to fetch artist' });
+    }
+});
+
 router.get('/:filter/:amount', async (req, res) => {
     try {
         if (!req.params.filter || !req.params.amount || parseInt(req.params.amount) < 1) {
@@ -40,9 +50,9 @@ router.get('/:filter/:amount', async (req, res) => {
     }
 })
 
-router.get('/name/:name', async (req, res) => {
+router.get('/fetch/name/:name', async (req, res) => {
     try {
-        const artist = getArtistByName(req.params.name);
+        const artist = await getArtistByName(req.params.name);
         res.json(artist);
     } catch (err) {
         console.error('Failed to fetch artist:', err);
@@ -50,17 +60,7 @@ router.get('/name/:name', async (req, res) => {
     }
 });
 
-router.get('/fetchbyid/:id', async (req, res) => {
-    try {
-        const artist = getArtistFromID(req.params.id);
-        res.json(artist);
-    } catch (err) {
-        console.error('Failed to fetch artist:', err);
-        res.status(500).json({ error: 'Failed to fetch artist' });
-    }
-});
-
-router.get('/similar/:id', async (req, res) => {
+router.get('/fetch/similar/:id', async (req, res) => {
     try {
         const similarArtists = await getSimilarArtistsFromArtist(req.params.id);
         res.json(similarArtists);
