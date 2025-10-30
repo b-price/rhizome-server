@@ -1,5 +1,5 @@
-export const SERVER_PROD_URL = 'https://rhizome-server-production.up.railway.app';
-export const SERVER_DEV_URL = 'https://rhizome-server-development.up.railway.app';
+export const SERVER_PROD_URL = 'https://api.rhizome.fyi';
+export const SERVER_DEV_URL = 'https://api.dev.rhizome.fyi';
 
 export const serverUrl = process.env.SERVER === 'production'
     ? process.env.CLIENT === 'production' ? SERVER_PROD_URL : SERVER_DEV_URL
