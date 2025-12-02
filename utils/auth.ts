@@ -14,7 +14,7 @@ export const auth = () => betterAuth({
         enabled: true,
         autoSignIn: true,
         sendResetPassword: async ({ user, url, token }, request) => {
-            void sendEmail({
+            await sendEmail({
                 to: user.email,
                 from: ADMIN_EMAIL,
                 subject: 'Reset your Rhizome password',
@@ -56,7 +56,7 @@ export const auth = () => betterAuth({
                 },
                 request  // The original request object (optional)
             ) => {
-                void sendEmail({
+                await sendEmail({
                     to: user.email,
                     from: ADMIN_EMAIL,
                     subject: 'Confirm your Rhizome account deletion',
