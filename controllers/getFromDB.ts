@@ -609,3 +609,8 @@ export async function findArtistsWithinDegrees(
     const results = await collections.artists?.aggregate<(Artist & { degree: number })>(pipeline).toArray();
     return results;
 }
+
+export async function verifyAccessCode(code: string, userEmail: string) {
+    const accessCode = await collections.accessCodes?.findOne({ userEmail });
+    return accessCode ? accessCode.code === code : false;
+}

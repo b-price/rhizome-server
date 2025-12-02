@@ -5,6 +5,7 @@ import {createUserData, deleteUserData} from "../controllers/writeToDB";
 import {ADMIN_EMAIL} from "./defaults";
 import {sendEmail} from "./email";
 import {FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, ngrokUrl, serverUrl} from "./urls";
+import {getOAuthState} from "better-auth/api";
 
 export const auth = () => betterAuth({
     database: authDB.db ? mongodbAdapter(authDB.db) : undefined,
@@ -13,7 +14,7 @@ export const auth = () => betterAuth({
         enabled: true,
         autoSignIn: true,
         sendResetPassword: async ({ user, url, token }, request) => {
-            await sendEmail({
+            void sendEmail({
                 to: user.email,
                 from: ADMIN_EMAIL,
                 subject: 'Reset your Rhizome password',
@@ -37,6 +38,11 @@ export const auth = () => betterAuth({
         },
     },
     user: {
+        additionalFields: {
+            appAccess: {
+                type: "string",
+            }
+        },
         changeEmail: {
             enabled: true,
         },
@@ -66,6 +72,18 @@ export const auth = () => betterAuth({
     databaseHooks: {
         user: {
             create: {
+                before: async (user, ctx) => {
+                    if (!!(ctx && ctx.params && ctx.params.id)) {
+                        const additionalData = await getOAuthState();
+                        if (additionalData?.appAccess) {
+                            return {
+                                data: {
+                                    appAccess: additionalData.appAccess
+                                }
+                            }
+                        }
+                    }
+                },
                 after: async (user, ctx) => {
                     const isSocial = !!(ctx && ctx.params && ctx.params.id);
                     //console.log(`trying to create ${JSON.stringify(user, null, 4)} with context ${JSON.stringify(ctx, null, 4)}`);

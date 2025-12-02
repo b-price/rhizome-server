@@ -7,6 +7,7 @@ import {topTracksArtist} from "./lastFMTopTracks";
 import {getYoutubeTrackID} from "./youTubeTopTracks";
 import {getSpotifyTrackID} from "./spotifyTopTracks";
 import {DEFAULT_USER_PREFERENCES} from "../utils/defaults";
+import {generateAccessCodes} from "../utils/generateAccessCodes";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -222,7 +223,7 @@ export async function addTopTracksToAllGenreTopArtists() {
 }
 
 export async function createUserData(id: string, socialUser?: boolean) {
-    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser: socialUser });
+    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser });
 }
 
 export async function deleteUserData(id: string) {
@@ -246,4 +247,13 @@ export async function updateUserPreferences(id: string, preferences: Preferences
 
 export async function submitFeedback(feedback: Feedback) {
     await collections.feedback?.insertOne(feedback);
+}
+
+export async function writeAccessCodes(emails: string[], phase: string, version: string) {
+    const codes = generateAccessCodes(emails, phase, version);
+    await collections.accessCodes?.insertMany(codes);
+}
+
+export async function assignUserToAccessCode(userID: string, code: string) {
+    await collections.accessCodes?.updateOne({ code }, { $set: { userID } });
 }

@@ -191,6 +191,7 @@ export interface ArtistLike {
 export interface Preferences {
     theme?: 'light' | 'dark' | 'system';
     player?: 'youtube' | 'spotify' | 'apple';
+    enableGraphCards?: boolean;
 }
 
 export interface User {
@@ -205,4 +206,12 @@ export interface Feedback {
     userID: string;
     email?: string;
     resolved: boolean;
+}
+
+export interface AccessCode {
+    code: string;
+    userEmail?: string;
+    userID?: string;
+    phase: string;
+    version: string;
 }

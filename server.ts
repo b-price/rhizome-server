@@ -6,6 +6,7 @@ import genreArtists from "./routes/artists";
 import search from "./routes/search";
 import initializeDB from "./routes/dbInit";
 import users from "./routes/users";
+import admin from "./routes/admin";
 import {connectDB} from "./db/connection";
 import {auth} from "./utils/auth";
 import { toNodeHandler } from "better-auth/node";
@@ -32,6 +33,7 @@ app.use('/artists', genreArtists);
 app.use('/search', search);
 app.use('/initializeDB', initializeDB);
 app.use('/users', users);
+app.use('/admin', admin);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

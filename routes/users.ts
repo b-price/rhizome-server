@@ -1,5 +1,5 @@
 import express from "express";
-import {getUserData} from "../controllers/getFromDB";
+import {getUserData, verifyAccessCode} from "../controllers/getFromDB";
 import {
     addUserLikedArtist,
     removeUserLikedArtist,
@@ -16,6 +16,19 @@ router.get('/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch user:', err);
         res.status(500).json({ error: 'Failed to fetch user' });
+    }
+});
+
+router.get('/verify-access-code/:code/:email', async (req, res) => {
+    try {
+        const verified = await verifyAccessCode(req.params.code, req.params.email);
+        if (verified) {
+            res.status(200).end();
+        } else {
+            res.status(401).json({error: 'Invalid access code'});
+        }
+    } catch (err) {
+        res.status(500).json({error: 'Failed to verify access code'});
     }
 });
 

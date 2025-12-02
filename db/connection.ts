@@ -7,6 +7,7 @@ export const collections: {
     badDataReports?: mongoDB.Collection,
     feedback?: mongoDB.Collection,
     users?: mongoDB.Collection,
+    accessCodes?: mongoDB.Collection,
 } = {};
 
 export const authDB: { db?: mongoDB.Db } = {};
@@ -23,11 +24,13 @@ export async function connectDB() {
     const badDataReports = db.collection('BadDataReports');
     const feedback = db.collection('Feedback');
     const users = db.collection('Users');
+    const accessCodes = db.collection('AccessCodes');
     collections.genres = genres;
     collections.artists = artists;
     collections.misc = misc;
     collections.badDataReports = badDataReports;
     collections.feedback = feedback;
     collections.users = users;
+    collections.accessCodes = accessCodes;
     authDB.db = dbAuth;
 }
