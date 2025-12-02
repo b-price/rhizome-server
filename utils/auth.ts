@@ -56,7 +56,7 @@ export const auth = () => betterAuth({
                 },
                 request  // The original request object (optional)
             ) => {
-                await sendEmail({
+                void sendEmail({
                     to: user.email,
                     from: ADMIN_EMAIL,
                     subject: 'Confirm your Rhizome account deletion',
