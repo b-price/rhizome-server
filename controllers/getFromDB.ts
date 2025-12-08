@@ -614,3 +614,7 @@ export async function verifyAccessCode(code: string, userEmail: string) {
     const accessCode = await collections.accessCodes?.findOne({ userEmail });
     return accessCode ? accessCode.code === code : false;
 }
+
+export async function getAccessCodes(phase?: string, version?: string, emails?: string[]) {
+    return await collections.accessCodes?.find({ phase, version, userEmail: { $in: emails } }).toArray();
+}

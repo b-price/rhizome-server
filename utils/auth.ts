@@ -56,19 +56,15 @@ export const auth = () => betterAuth({
                 },
                 request  // The original request object (optional)
             ) => {
-                console.log(`sending email to ${user.email}...`)
                 await sendEmail({
                     to: user.email,
                     from: ADMIN_EMAIL,
                     subject: 'Confirm your Rhizome account deletion',
                     text: `Click the link to permanently delete your account (no going back!): ${url}`
                 });
-                console.log('email sent, deleting user...')
             },
             afterDelete: async (user, request) => {
-                console.log(`deleting user data from ${user.email}...`);
                 await deleteUserData(user.id);
-                console.log('deleted user data')
             }
         }
     },
@@ -91,7 +87,7 @@ export const auth = () => betterAuth({
                 after: async (user, ctx) => {
                     const isSocial = !!(ctx && ctx.params && ctx.params.id);
                     //console.log(`trying to create ${JSON.stringify(user, null, 4)} with context ${JSON.stringify(ctx, null, 4)}`);
-                    console.log(`creating user...`)
+                    //console.log(`creating user...`)
                     await createUserData(user.id, isSocial);
                 }
             },

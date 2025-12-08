@@ -188,10 +188,13 @@ export interface ArtistLike {
     date: Date;
 }
 
+export type PreviewTrigger = 'modifier' | 'delay';
+
 export interface Preferences {
     theme?: 'light' | 'dark' | 'system';
     player?: 'youtube' | 'spotify' | 'apple';
     enableGraphCards?: boolean;
+    previewTrigger?: PreviewTrigger;
 }
 
 export interface User {

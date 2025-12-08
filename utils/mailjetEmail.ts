@@ -1,6 +1,8 @@
 import Mailjet from "node-mailjet";
 
-export async function sendEmail(email: { to: string, from: string, subject: string, text?: string, html?: string }) {
+export async function sendEmail(
+    email: { to: string, from: string, subject: string, text?: string, html?: string, fromName?: string }
+) {
     try {
         const publicKey = process.env.MAILJET_API_KEY;
         const privateKey = process.env.MAILJET_SECRET_KEY;
@@ -18,7 +20,7 @@ export async function sendEmail(email: { to: string, from: string, subject: stri
                     {
                         From: {
                             Email: email.from,
-                            Name: 'Rhizome'
+                            Name: email.fromName ?? 'Rhizome',
                         },
                         To: [{
                             Email: email.to,
