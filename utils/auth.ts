@@ -3,7 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import {authDB} from "../db/connection";
 import {createUserData, deleteUserData} from "../controllers/writeToDB";
 import {ADMIN_EMAIL} from "./defaults";
-import {sendEmail} from "./email";
+import {sendEmail} from "./mailjetEmail";
 import {FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, ngrokUrl, serverUrl} from "./urls";
 import {getOAuthState} from "better-auth/api";
 
