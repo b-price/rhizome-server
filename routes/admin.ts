@@ -12,22 +12,26 @@ import {sendAccessEmails} from "../utils/accessEmails";
 
 const router = express.Router();
 
-router.get('/codes/:phase/:version', async (req, res) => {
-
-});
-
 router.post('/generate-codes', async (req, res) => {
     if (!req.body) {
         res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
     }
     if (!req.body.emails) {
         res.status(400).json({error: 'Email address list "emails" required'});
+        return;
     }
     if (!req.body.phase) {
         res.status(400).json({error: 'App phase "phase" required'});
+        return;
     }
     if (!req.body.version) {
         res.status(400).json({error: 'App version "version" required'});
+        return;
     }
     try {
         await writeAccessCodes(req.body.emails, req.body.phase, req.body.version);
@@ -40,6 +44,11 @@ router.post('/generate-codes', async (req, res) => {
 router.post('/send-access-emails', async (req, res) => {
     if (!req.body) {
         res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
     }
     try {
         const sendees = await sendAccessEmails(
@@ -61,15 +70,23 @@ router.post('/send-access-emails', async (req, res) => {
 router.post('/generate-access-codes-and-send', async (req, res) => {
     if (!req.body) {
         res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
     }
     if (!req.body.emails) {
         res.status(400).json({error: 'Email address list "emails" required'});
+        return;
     }
     if (!req.body.phase) {
         res.status(400).json({error: 'App phase "phase" required'});
+        return;
     }
     if (!req.body.version) {
         res.status(400).json({error: 'App version "version" required'});
+        return;
     }
     try {
         await writeAccessCodes(req.body.emails, req.body.phase, req.body.version);
