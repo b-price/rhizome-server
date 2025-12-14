@@ -5,11 +5,12 @@ export function generateAccessCodes(emails: string[], phase: string, version: st
     const codes: AccessCode[] = [];
     emails.forEach(email => {
         codes.push({
-            userEmail: email,
+            userEmail: email.toLowerCase(),
             phase: phase,
             version: version,
             code: randomUUID(),
         });
     });
+    console.log(codes);
     return codes;
 }

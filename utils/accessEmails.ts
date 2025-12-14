@@ -20,16 +20,19 @@ export async function sendAccessEmails(
         console.error('No matching access codes found');
         throw new Error('No matching access codes found');
     }
+    const minDelay = 500;
     const sendees = [];
     for (const code of codeObjects) {
         await sendEmail({
             to: code.userEmail,
             from,
-            subject,
+            subject: `${subject}${code.userEmail}`,
             html: `${bodyPreCode}${code.code}${bodyPostCode}`,
             fromName,
         });
-        sendees.push(code.userEmail);
+        sendees.push({ email: code.userEmail, code: code.code });
+        // const delay = minDelay * (1 + Math.random());
+        // await new Promise(resolve => setTimeout(resolve, delay));
     }
     return sendees;
 }

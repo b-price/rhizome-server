@@ -7,6 +7,10 @@ export async function getAllGenresFromDB() {
     return await collections.genres?.find({}).toArray() as unknown as Genre[];
 }
 
+export async function getGenresFromIDs(genreIDs: string[]) {
+    return await collections.genres?.find({ id: {$in: genreIDs} }).toArray();
+}
+
 export async function getAllGenreData() {
     const genresStart = Date.now();
     //console.log('Fetching genres...')
@@ -94,6 +98,35 @@ export async function getMultipleGenresArtistsData(filter: FilterField, amount: 
 
 export async function getMultipleGenresArtists(filter: FilterField, amount: number, genreIDs: string[]) {
     return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
+}
+
+export async function getRelatedGenresArtists(artist: Artist, filter: FilterField, amount: number, useSimilar = true) {
+    if (!artist.genres.length) {
+        return;
+    }
+    const genres = await getGenresFromIDs(artist.genres);
+    const artists = await getMultipleGenresArtists(filter, amount, artist.genres) as unknown as Artist[];
+    if (!artists || !artists.length) {
+        return;
+    }
+    const artistIDs = artists.map(artist => artist.id);
+    if (!artistIDs.includes(artist.id)) {
+        artists.push(artist);
+    }
+    if (useSimilar) {
+        const similarArtists = await getSimilarArtistsFromArray(artist.similar);
+        for (const similarArtist of similarArtists) {
+            if (!artistIDs.includes(similarArtist.id) && similarArtist.genres.some(g => artist.genres.includes(g))) {
+                artists.push(similarArtist);
+            }
+        }
+    }
+    return {
+        artists,
+        count: await getArtistCountSum(artist.genres),
+        links: createArtistLinksLessCPU(artists),
+        genres,
+    }
 }
 
 export async function getArtistCountSum(genreIDs: string[]) {
@@ -611,10 +644,26 @@ export async function findArtistsWithinDegrees(
 }
 
 export async function verifyAccessCode(code: string, userEmail: string) {
-    const accessCode = await collections.accessCodes?.findOne({ userEmail });
+    const accessCode = await collections.accessCodes?.findOne({ userEmail: userEmail.toLowerCase() });
     return accessCode ? accessCode.code === code : false;
 }
 
 export async function getAccessCodes(phase?: string, version?: string, emails?: string[]) {
     return await collections.accessCodes?.find({ phase, version, userEmail: { $in: emails } }).toArray();
+}
+
+export async function removeAccessCodesByPhase(phase: string) {
+    const result = await collections.accessCodes?.deleteMany({ phase });
+    console.log(result?.deletedCount)
+}
+
+export async function removeAccessCodesByVersion(version: string) {
+    const result = await collections.accessCodes?.deleteMany({ version });
+    console.log(result?.deletedCount)
+}
+
+export async function removeAccessCodesByEmail(emails: string[]) {
+    const lowerEmails = emails.map(email => email.toLowerCase());
+    const result = await collections.accessCodes?.deleteMany({ userEmail: { $in: lowerEmails } });
+    console.log(result?.deletedCount)
 }

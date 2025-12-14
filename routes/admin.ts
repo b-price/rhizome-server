@@ -9,6 +9,7 @@ import {
     APP_NAME
 } from "../utils/defaults";
 import {sendAccessEmails} from "../utils/accessEmails";
+import {removeAccessCodesByEmail, removeAccessCodesByPhase, removeAccessCodesByVersion} from "../controllers/getFromDB";
 
 const router = express.Router();
 
@@ -104,6 +105,57 @@ router.post('/generate-access-codes-and-send', async (req, res) => {
         res.status(200).json(`Successfully generated and sent access code emails to ${sendees}`);
     } catch (err) {
         res.status(500).json({error: 'Failed to send access codes:', err});
+    }
+});
+
+router.delete('/delete-codes-phase', async (req, res) => {
+    if (!req.body) {
+        res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
+    }
+    try {
+        await removeAccessCodesByPhase(req.body.phase);
+        res.status(200).json('Successfully removed access codes')
+    } catch (err) {
+        res.status(500).json({error: 'Failed to remove access codes'});
+    }
+});
+
+router.delete('/delete-codes-version', async (req, res) => {
+    if (!req.body) {
+        res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
+    }
+    try {
+        await removeAccessCodesByVersion(req.body.version);
+        res.status(200).json('Successfully removed access codes')
+    } catch (err) {
+        res.status(500).json({error: 'Failed to remove access codes'});
+    }
+});
+
+router.delete('/delete-codes-email', async (req, res) => {
+    if (!req.body) {
+        res.status(400).json({error: 'JSON body required'});
+        return;
+    }
+    if (!req.body.password || req.body.password !== process.env.ADMIN_PASSWORD) {
+        res.status(403).json({error: 'Invalid password'});
+        return;
+    }
+    try {
+        await removeAccessCodesByEmail(req.body.emails);
+        res.status(200).json('Successfully removed access codes')
+    } catch (err) {
+        res.status(500).json({error: 'Failed to remove access codes'});
     }
 });
 

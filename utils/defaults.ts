@@ -5,13 +5,13 @@ export const APP_NAME = process.env.APP_NAME || 'Rhizome';
 export const DEFAULT_USER_PREFERENCES: Preferences = {
     theme: 'system',
     player: 'youtube',
-    enableGraphCards: false,
+    enableGraphCards: true,
     previewTrigger: 'modifier',
 }
 
 export const ADMIN_EMAIL = 'admin@rhizome.fyi';
 
-export const ACCESS_CODES_EMAIL_SUBJECT = 'Rhizome Alpha';
+export const ACCESS_CODES_EMAIL_SUBJECT = 'Rhizome Alpha Access Code for ';
 
 export const ACCESS_CODES_EMAIL_PRE_CODE = `<html><head><title>Rhizome Alpha</title><meta charset="utf-8">
         <style>

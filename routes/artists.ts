@@ -1,8 +1,17 @@
 import express from "express";
 import {
-    getArtistByName, getArtistDataFiltered, getArtistFromID, getDuplicateArtists,
-    getGenreArtistData, getMultipleArtists, getMultipleGenresArtistsData, getNoParentGenreArtists, getParentOnlyArtists,
-    getSimilarArtistsFromArtist, getTopArtists
+    getArtistByName,
+    getArtistDataFiltered,
+    getArtistFromID,
+    getDuplicateArtists,
+    getGenreArtistData,
+    getMultipleArtists,
+    getMultipleGenresArtistsData,
+    getNoParentGenreArtists,
+    getParentOnlyArtists,
+    getRelatedGenresArtists,
+    getSimilarArtistsFromArtist,
+    getTopArtists
 } from "../controllers/getFromDB";
 import {flipBadDataArtist, submitBadDataReport, updateArtistTopTracks} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
@@ -167,6 +176,21 @@ router.post('/multiple', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch artists from genres:', err);
         res.status(500).json({ error: 'Failed to fetch artists from genres' });
+    }
+});
+
+router.post('/related-genres', async (req, res) => {
+    if (!req.body.filter || !req.body.amount || parseInt(req.body.amount) < 1 || !req.body.artist) {
+        console.error('Invalid json body');
+        res.status(404).json({ error: 'Invalid json body' });
+        return;
+    }
+    try {
+        const artistData = await getRelatedGenresArtists(req.body.artist, req.body.filter as FilterField, parseInt(req.body.amount), req.body.useSimilar);
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists from related genres:', err);
+        res.status(500).json({ error: 'Failed to fetch artists from related genres' });
     }
 });
 
