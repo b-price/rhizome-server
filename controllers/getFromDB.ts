@@ -2,6 +2,7 @@ import {collections} from "../db/connection";
 import {Artist, Genre, ParentField, LinkType, FilterField, BasicItem} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 import {ObjectId} from "mongodb";
+import {setCodeAccessed} from "./writeToDB";
 
 export async function getAllGenresFromDB() {
     return await collections.genres?.find({}).toArray() as unknown as Genre[];
@@ -645,7 +646,11 @@ export async function findArtistsWithinDegrees(
 
 export async function verifyAccessCode(code: string, userEmail: string) {
     const accessCode = await collections.accessCodes?.findOne({ userEmail: userEmail.toLowerCase() });
-    return accessCode ? accessCode.code === code : false;
+    const isValid = accessCode ? accessCode.code === code : false;
+    if (isValid) {
+        await setCodeAccessed(code, isValid);
+    }
+    return isValid;
 }
 
 export async function getAccessCodes(phase?: string, version?: string, emails?: string[]) {

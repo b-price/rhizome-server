@@ -257,3 +257,7 @@ export async function writeAccessCodes(emails: string[], phase: string, version:
 export async function assignUserToAccessCode(userID: string, code: string) {
     await collections.accessCodes?.updateOne({ code }, { $set: { userID } });
 }
+
+export async function setCodeAccessed(code: string, accessed: boolean) {
+    await collections.accessCodes?.updateOne({ code }, { $set: { accessed } });
+}

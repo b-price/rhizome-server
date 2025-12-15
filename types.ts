@@ -217,4 +217,5 @@ export interface AccessCode {
     userID?: string;
     phase: string;
     version: string;
+    accessed?: boolean;
 }
