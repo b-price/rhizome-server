@@ -646,7 +646,7 @@ export async function findArtistsWithinDegrees(
 
 export async function verifyAccessCode(code: string, userEmail: string) {
     const accessCode = await collections.accessCodes?.findOne({ userEmail: userEmail.toLowerCase() });
-    const isValid = accessCode ? accessCode.code === code : false;
+    const isValid = accessCode ? accessCode.code === code || accessCode.accessed : false;
     if (isValid) {
         await setCodeAccessed(code, isValid);
     }
