@@ -20,6 +20,8 @@ import {topTrackArtists, topTracksArtist} from "../controllers/lastFMTopTracks";
 
 const router = express.Router();
 
+// GET
+
 // Fetches all artists of the genre
 router.get('/:genreID', async (req, res) => {
     try {
@@ -37,6 +39,7 @@ router.get('/:genreID', async (req, res) => {
     }
 });
 
+// Fetch single artist by mbid
 router.get('/fetch/id/:id', async (req, res) => {
     try {
         const artist = await getArtistFromID(req.params.id);
@@ -47,6 +50,7 @@ router.get('/fetch/id/:id', async (req, res) => {
     }
 });
 
+// Fetch all artists sorted by an attribute within the limit
 router.get('/:filter/:amount', async (req, res) => {
     try {
         if (!req.params.filter || !req.params.amount || parseInt(req.params.amount) < 1) {
@@ -60,6 +64,7 @@ router.get('/:filter/:amount', async (req, res) => {
     }
 })
 
+// Fetch a single artist by name
 router.get('/fetch/name/:name', async (req, res) => {
     try {
         const artist = await getArtistByName(req.params.name);
@@ -70,6 +75,7 @@ router.get('/fetch/name/:name', async (req, res) => {
     }
 });
 
+// Fetch full artist data for an artist's similar artists
 router.get('/fetch/similar/:id', async (req, res) => {
     try {
         const similarArtists = await getSimilarArtistsFromArtist(req.params.id);
@@ -80,6 +86,7 @@ router.get('/fetch/similar/:id', async (req, res) => {
     }
 });
 
+// Updates artist's top tracks (should be put?)
 router.get('/toptracks/:id/:name', async (req, res) => {
     try {
         //const start = Date.now();
@@ -113,6 +120,7 @@ router.get('/noparent/:genreID/:linktype', async (req, res) => {
     }
 });
 
+// Fetches the top [amount] artists in the genre
 router.get('/top/:genreID/:amount', async (req, res) => {
     try {
         const topArtists = await getTopArtists(req.params.genreID, parseInt(req.params.amount));
@@ -123,6 +131,7 @@ router.get('/top/:genreID/:amount', async (req, res) => {
     }
 });
 
+// Fetches artists who have the same MBID
 router.get('/duplicates/all/dupes', async (req, res) => {
     try {
         const dupes = await getDuplicateArtists();
@@ -137,6 +146,9 @@ router.get('/duplicates/all/dupes', async (req, res) => {
     }
 });
 
+// POST
+
+// Fetches youtube IDs of the top track of each given artist
 router.post('/toptracks/multiple', async (req, res) => {
     try {
         const artists = req.body.artists;
@@ -151,6 +163,7 @@ router.post('/toptracks/multiple', async (req, res) => {
     }
 });
 
+// Fetches the artists in [genres] sorted by [filter] up to [amount]
 router.post('/:filter/:amount', async (req, res) => {
     try {
         const genres = req.body.genres;
@@ -165,6 +178,7 @@ router.post('/:filter/:amount', async (req, res) => {
     }
 });
 
+// Fetches full artist data and links for the given artist IDs
 router.post('/multiple', async (req, res) => {
     try {
         const artists = req.body.artists;
@@ -179,6 +193,7 @@ router.post('/multiple', async (req, res) => {
     }
 });
 
+// Fetches artists in an artist's related genres (optionally force similar artists with [useSimilar]
 router.post('/related-genres', async (req, res) => {
     if (!req.body.filter || !req.body.amount || parseInt(req.body.amount) < 1 || !req.body.artist) {
         console.error('Invalid json body');
@@ -194,6 +209,7 @@ router.post('/related-genres', async (req, res) => {
     }
 });
 
+// Posts a bad data report for an artist
 router.post('/baddata/report/submit', async (req, res) => {
     try {
         const report = req.body.report;
@@ -208,6 +224,9 @@ router.post('/baddata/report/submit', async (req, res) => {
     }
 });
 
+// PUT
+
+// Flip the bad data flag for an artist
 router.put('/bdflag/:id/:reason', async (req, res) => {
     try {
         await flipBadDataArtist(req.params.id, req.params.reason);
