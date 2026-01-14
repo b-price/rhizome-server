@@ -98,7 +98,7 @@ export async function getMultipleGenresArtistsData(filter: FilterField, amount: 
 }
 
 export async function getMultipleGenresArtists(filter: FilterField, amount: number, genreIDs: string[]) {
-    return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
+    return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }, }).sort({ [filter]: -1 }).limit(amount).toArray();
 }
 
 export async function getRelatedGenresArtists(artist: Artist, filter: FilterField, amount: number, useSimilar = true) {

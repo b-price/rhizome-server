@@ -219,3 +219,8 @@ export interface AccessCode {
     version: string;
     accessed?: boolean;
 }
+
+export interface Decade {
+    startYear: number;
+    endYear: number;
+}

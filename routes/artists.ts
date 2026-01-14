@@ -197,7 +197,7 @@ router.post('/multiple', async (req, res) => {
 router.post('/related-genres', async (req, res) => {
     if (!req.body.filter || !req.body.amount || parseInt(req.body.amount) < 1 || !req.body.artist) {
         console.error('Invalid json body');
-        res.status(404).json({ error: 'Invalid json body' });
+        res.status(400).json({ error: 'Invalid json body' });
         return;
     }
     try {
@@ -206,6 +206,24 @@ router.post('/related-genres', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch artists from related genres:', err);
         res.status(500).json({ error: 'Failed to fetch artists from related genres' });
+    }
+});
+
+// Fetches the artists in [genres] sorted by [filter] up to [amount]
+router.post('/filtered-genres', async (req, res) => {
+    const genres = req.body.genres;
+    if (!req.body.filter || !req.body.amount || parseInt(req.body.amount) < 1 || !genres || !genres.length) {
+        console.error('Invalid json body');
+        res.status(400).json({ error: 'Invalid json body' });
+        return;
+    }
+    try {
+
+        const artistData = await getMultipleGenresArtistsData(req.body.filter as FilterField, parseInt(req.body.amount), genres);
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists from genres:', err);
+        res.status(500).json({ error: 'Failed to fetch artists from genres' });
     }
 });
 
