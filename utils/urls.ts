@@ -12,7 +12,7 @@ export const spotifyServerUrl = process.env.SERVER === 'production'
 
 export const FRONTEND_DEPLOYMENT_URL = 'https://www.rhizome.fyi';
 export const FRONTEND_LOCALHOST = 'http://localhost:5173';
-export const FRONTEND_PREVIEW_REGEX = /https:\/\/(rizhome|rhizome)-[a-zA-Z0-9]+-chonathons-projects.vercel.app/;
+export const FRONTEND_PREVIEW_REGEX = /https:\/\/(rizhome|rhizome)-[a-zA-Z0-9-_]+-chonathons-projects.vercel.app/;
 export const BETTER_AUTH_PREVIEWS_WILDCARD = 'https://*.vercel.app';
 export const allowedTestingOrigins = [FRONTEND_LOCALHOST, FRONTEND_PREVIEW_REGEX];
 
