@@ -4,7 +4,7 @@ import {authDB} from "../db/connection";
 import {createUserData, deleteUserData} from "../controllers/writeToDB";
 import {ADMIN_EMAIL} from "./defaults";
 import {sendEmail} from "./mailjetEmail";
-import {FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, ngrokUrl, serverUrl} from "./urls";
+import {BETTER_AUTH_PREVIEWS_WILDCARD, FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, spotifyServerUrl, serverUrl} from "./urls";
 import {getOAuthState} from "better-auth/api";
 
 export const auth = () => betterAuth({
@@ -34,7 +34,7 @@ export const auth = () => betterAuth({
         spotify: {
             clientId: process.env.SPOTIFY_CLIENT_ID as string,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
-            redirectURI: `${ngrokUrl}/api/auth/callback/spotify`,
+            redirectURI: `${spotifyServerUrl}/api/auth/callback/spotify`,
         },
     },
     user: {
@@ -68,7 +68,7 @@ export const auth = () => betterAuth({
             }
         }
     },
-    trustedOrigins: [FRONTEND_LOCALHOST, FRONTEND_DEPLOYMENT_URL],
+    trustedOrigins: [FRONTEND_LOCALHOST, FRONTEND_DEPLOYMENT_URL, BETTER_AUTH_PREVIEWS_WILDCARD],
     databaseHooks: {
         user: {
             create: {
