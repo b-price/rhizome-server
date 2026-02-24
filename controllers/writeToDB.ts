@@ -291,16 +291,19 @@ export async function getLastFMUsername(userID: string) {
 export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?: string, addSusNames = false) {
     const lfmUsername = lastfmUsername ? lastfmUsername : await getLastFMUsername(userID);
     if (!lfmUsername) throw new Error('No last.fm username found.');
-    const lfmArtists = await fetchLastFMUserArtists(lfmUsername);
+    const lfmArtistsData = await fetchLastFMUserArtists(lfmUsername);
+    if (!lfmArtistsData || !lfmArtistsData.artists.length) throw new Error('No artists found in user last.fm account.');
+    const lfmArtists = lfmArtistsData.artists;
     const projection = { "liked.id": 1, _id: 0 };
     const user = await collections.users?.findOne({ id: userID }, { projection });
 
     const existingIDs = new Set((user?.liked ?? []).map((a: ArtistLike) => a.id));
     const doNotAddIdx: number[] = [];
     const susIdx: number[] = [];
-    for (let i = 0; i < lfmArtists.length; i++) {
+
+    for (let i = 0; i < lfmArtists.artists.length; i++) {
         // Don't try to re-add artists the user already likes
-        if (existingIDs.has(lfmArtists[i].id)) {
+        if (existingIDs.has(lfmArtists.artists[i].id)) {
             doNotAddIdx.push(i);
         } else if (!lfmArtists[i].id || !lfmArtists[i].id.length) {
             // const bestMatch = await throttleQueue.enqueue(() => mbArtistSearch(lfmArtists[i].name, 1));

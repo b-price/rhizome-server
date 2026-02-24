@@ -5,13 +5,12 @@ import {
     addUserLikedArtist,
     removeUserLikedArtist,
     submitFeedback,
-    updateUserPreferences
+    updateUserPreferences, verifyLastFMUser
 } from "../controllers/writeToDB";
 import {getLFMAuthUrl, lastfmAuthHandler} from "../controllers/lastfmAuth";
+import {lastFMUserPreview} from "../utils/fetchLastFMUserArtists";
 
 const router = express.Router();
-
-export const LFM_USER_SESSION_ENDPOINT = '/lastfm/user/session'
 
 router.get('/:id', async (req, res) => {
     try {
@@ -36,6 +35,24 @@ router.get('/verify-access-code/:code/:email', async (req, res) => {
     }
 });
 
+router.get('/lastfm/userpreview/:lfmusername', async (req, res) => {
+    try {
+        if (!req.params.lfmusername) {
+            res.status(400).json({error: 'Missing last.fm username parameter'});
+        }
+        const username = req.params.lfmusername;
+        const user = await verifyLastFMUser(username);
+        if (!user) {
+            res.status(400).json({error: `No last.fm user found with username ${username}`});
+        }
+        const userPreview = await lastFMUserPreview(username);
+        res.status(200).json({ preview: userPreview });
+    } catch (err) {
+        console.error('Failed to fetch last.fm user preview:', err);
+        res.status(500).json({ error: 'Failed to fetch last.fm user preview' });
+    }
+});
+
 router.get('/lastfm/authurl', async (req, res) => {
     try {
         const url = getLFMAuthUrl();
@@ -45,6 +62,8 @@ router.get('/lastfm/authurl', async (req, res) => {
         res.status(500).json({ error: 'Failed to generate last.fm auth url' });
     }
 });
+
+export const LFM_USER_SESSION_ENDPOINT = '/lastfm/user/session';
 
 router.get(`${LFM_USER_SESSION_ENDPOINT}`, async (req, res) => {
     try {
