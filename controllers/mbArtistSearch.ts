@@ -9,7 +9,7 @@ const LIMIT = 20;
 const CACHE_DIR = path.join(process.cwd(), 'data', 'genreArtists');
 const CACHE_DURATION_DAYS = 60;
 
-export const mbArtistSearch = async (query: string) => {
+export const mbArtistSearch = async (query: string, limit = LIMIT) => {
     try {
         const res = await axios.get<ArtistResponse>(`${BASE_URL}${query}&limit=${LIMIT}&offset=0`, {
             headers: {

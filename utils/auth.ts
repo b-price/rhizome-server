@@ -4,7 +4,13 @@ import {authDB} from "../db/connection";
 import {createUserData, deleteUserData} from "../controllers/writeToDB";
 import {ADMIN_EMAIL} from "./defaults";
 import {sendEmail} from "./mailjetEmail";
-import {BETTER_AUTH_PREVIEWS_WILDCARD, FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, spotifyServerUrl, serverUrl} from "./urls";
+import {
+    BETTER_AUTH_PREVIEWS_WILDCARD,
+    FRONTEND_DEPLOYMENT_URL,
+    FRONTEND_LOCALHOST,
+    spotifyServerUrl,
+    serverUrl,
+} from "./urls";
 import {getOAuthState} from "better-auth/api";
 
 export const auth = () => betterAuth({

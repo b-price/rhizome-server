@@ -7,3 +7,4 @@ data/genres/rawData
 data/exampleSchema
 .env
 dist
+/data/genres/sameNameArtists.json

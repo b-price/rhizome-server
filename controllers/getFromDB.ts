@@ -182,6 +182,11 @@ export async function searchDB(query: string) {
     return [...artistResults, ...genreResults];
 }
 
+export async function matchArtistNameInDB(query: string, limit = 10) {
+    const searchQuery = [{ $search: { text: { query, path: "name" }, index: "name" } }, { $limit: limit }];
+    return collections.artists?.aggregate(searchQuery).toArray();
+}
+
 export async function getArtistByName(name: string) {
     return await collections.artists?.findOne({ name: name });
 }
@@ -562,6 +567,30 @@ export async function getDuplicateArtists() {
         },
         { $match: { duplicateCount: { $gt: 1 } } },
         { $project: { duplicateCount: 0 } }]).toArray();
+}
+
+export async function getDuplicateArtistsNames() {
+    return collections.artists?.aggregate([
+        { $match: { name: { $type: "string" } } }, // optional: skip null/missing
+        {
+            $setWindowFields: {
+                partitionBy: "$name",
+                output: {
+                    duplicateCount: { $count: {} }
+                }
+            }
+        },
+        { $match: { duplicateCount: { $gt: 1 } } },
+
+        // project ONLY id + name
+        {
+            $project: {
+                _id: 0,     // optional but usually desired
+                id: 1,
+                name: 1
+            }
+        }
+    ]).toArray();
 }
 
 export async function getUserData(id: string) {

@@ -1,13 +1,18 @@
 import {collections} from "../db/connection";
-import {getAllGenresFromDB, getGenreRoots, getTopArtists} from "./getFromDB";
+import {getAllGenresFromDB, getGenreRoots, getTopArtists, matchArtistNameInDB} from "./getFromDB";
 import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
 import {ObjectId, PushOperator} from "mongodb";
-import {BadDataReport, Feedback, Genre, Preferences, TopTrack} from "../types";
+import {ArtistLike, BadDataReport, Feedback, Genre, Preferences, TopTrack} from "../types";
 import {topTracksArtist} from "./lastFMTopTracks";
 import {getYoutubeTrackID} from "./youTubeTopTracks";
 import {getSpotifyTrackID} from "./spotifyTopTracks";
 import {DEFAULT_USER_PREFERENCES} from "../utils/defaults";
 import {generateAccessCodes} from "../utils/generateAccessCodes";
+import {fetchLastFMUserArtists} from "../utils/fetchLastFMUserArtists";
+import {mbArtistSearch} from "./mbArtistSearch";
+import {checkLastFMUsername} from "../utils/checkLastFMUsername";
+import throttleQueue from "../utils/throttleQueue";
+import {artistNamesMatch} from "../utils/parsing";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -260,4 +265,72 @@ export async function assignUserToAccessCode(userID: string, code: string) {
 
 export async function setCodeAccessed(code: string, accessed: boolean) {
     await collections.accessCodes?.updateOne({ code }, { $set: { accessed } });
+}
+
+export async function addLFMtoUser(userID: string, lfmUsername: string, updateLiked = true) {
+    if (await verifyLastFMUser(lfmUsername)) {
+        await collections.users?.updateOne({id: userID}, { $set: { lfmUsername: lfmUsername } });
+        if (updateLiked) {
+            await updateUserLikesFromLastFM(userID, lfmUsername);
+        }
+    } else {
+        throw new Error(`Last.fm user ${lfmUsername} not found.`);
+    }
+}
+
+export async function verifyLastFMUser(lfmUsername: string) {
+    const user = await checkLastFMUsername(lfmUsername);
+    return (user && user.name);
+}
+
+export async function getLastFMUsername(userID: string) {
+    const user = await collections.users?.findOne({ userID });
+    if (user && user.lfmUsername) return user.lfmUsername;
+}
+
+export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?: string, addSusNames = false) {
+    const lfmUsername = lastfmUsername ? lastfmUsername : await getLastFMUsername(userID);
+    if (!lfmUsername) throw new Error('No last.fm username found.');
+    const lfmArtists = await fetchLastFMUserArtists(lfmUsername);
+    const projection = { "liked.id": 1, _id: 0 };
+    const user = await collections.users?.findOne({ id: userID }, { projection });
+
+    const existingIDs = new Set((user?.liked ?? []).map((a: ArtistLike) => a.id));
+    const doNotAddIdx: number[] = [];
+    const susIdx: number[] = [];
+    for (let i = 0; i < lfmArtists.length; i++) {
+        // Don't try to re-add artists the user already likes
+        if (existingIDs.has(lfmArtists[i].id)) {
+            doNotAddIdx.push(i);
+        } else if (!lfmArtists[i].id || !lfmArtists[i].id.length) {
+            // const bestMatch = await throttleQueue.enqueue(() => mbArtistSearch(lfmArtists[i].name, 1));
+            const bestMatch = await matchArtistNameInDB(lfmArtists[i].name, 1);
+            if (bestMatch && bestMatch[0] && bestMatch[0].id) {
+                //console.log(`Found match for ${lfmArtists[i].name}: ${bestMatch[0].name}, ${bestMatch[0].startDate}, ${bestMatch[0].location}`);
+                if (!artistNamesMatch(lfmArtists[i].name, bestMatch[0].name)) {
+                    susIdx.push(i);
+                    //console.log('(But the name is not an exact match)');
+                }
+                lfmArtists[i].id = bestMatch[0].id;
+            } else {
+                //console.log('no artist found with name ', lfmArtists[i].name);
+                doNotAddIdx.push(i);
+            }
+        }
+    }
+    //console.log('Total artists found: ', lfmArtists.length);
+    for (const index of doNotAddIdx) {
+        lfmArtists.splice(index, 1);
+    }
+    //console.log('Less not-found artists: ', lfmArtists.length);
+    if (!addSusNames) {
+        for (const index of susIdx) {
+            lfmArtists.splice(index, 1);
+        }
+    }
+    //console.log('Less poorly-matched artists: ', lfmArtists.length);
+    await collections.users?.updateOne(
+        { id: userID },
+        { $push: { liked: { $each: lfmArtists } } as unknown as PushOperator<Document> }
+    );
 }

@@ -186,6 +186,7 @@ export interface TopTrackPlayIDs {
 export interface ArtistLike {
     id: string;
     date: Date;
+    playcount?: number;
 }
 
 export type PreviewTrigger = 'modifier' | 'delay';
@@ -202,6 +203,7 @@ export interface User {
     liked: ArtistLike[];
     preferences: Preferences;
     socialUser?: boolean;
+    lfmUsername?: string;
 }
 
 export interface Feedback {

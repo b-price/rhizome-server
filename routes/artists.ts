@@ -3,7 +3,7 @@ import {
     getArtistByName,
     getArtistDataFiltered,
     getArtistFromID,
-    getDuplicateArtists,
+    getDuplicateArtists, getDuplicateArtistsNames,
     getGenreArtistData,
     getMultipleArtists,
     getMultipleGenresArtistsData,
@@ -11,7 +11,7 @@ import {
     getParentOnlyArtists,
     getRelatedGenresArtists,
     getSimilarArtistsFromArtist,
-    getTopArtists
+    getTopArtists, matchArtistNameInDB
 } from "../controllers/getFromDB";
 import {flipBadDataArtist, submitBadDataReport, updateArtistTopTracks} from "../controllers/writeToDB";
 import { memoryUsage } from "node:process"
@@ -75,6 +75,17 @@ router.get('/fetch/name/:name', async (req, res) => {
     }
 });
 
+// Get the top results of an artist name
+router.get('/fetch/matchname/:name', async (req, res) => {
+    try {
+        const artists = await matchArtistNameInDB(req.params.name);
+        res.json(artists);
+    } catch (err) {
+        console.error('Failed to fetch artist:', err);
+        res.status(500).json({ error: 'Failed to fetch artist' });
+    }
+});
+
 // Fetch full artist data for an artist's similar artists
 router.get('/fetch/similar/:id', async (req, res) => {
     try {
@@ -132,13 +143,25 @@ router.get('/top/:genreID/:amount', async (req, res) => {
 });
 
 // Fetches artists who have the same MBID
-router.get('/duplicates/all/dupes', async (req, res) => {
+router.get('/duplicates/all/mbid', async (req, res) => {
     try {
         const dupes = await getDuplicateArtists();
         if (dupes) {
             const dupeSet = new Set(dupes.map(d => d.id))
             res.json(Array.from(dupeSet));
         }
+        res.end();
+    } catch (err) {
+        console.error('Failed to fetch duplicate artists:', err);
+        res.status(500).json({ error: 'Failed to fetch duplicate artists' });
+    }
+});
+
+// Fetches artists who have the same name
+router.get('/duplicates/all/name', async (req, res) => {
+    try {
+        const dupes = await getDuplicateArtistsNames();
+        res.json(dupes);
         res.end();
     } catch (err) {
         console.error('Failed to fetch duplicate artists:', err);

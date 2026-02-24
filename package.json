@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch '**/*.ts' --exec 'ts-node' server.ts"
+    "dev": "nodemon --watch '**/*.ts' --exec 'ts-node' server.ts",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -29,8 +30,11 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.10",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.10",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
