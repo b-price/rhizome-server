@@ -301,9 +301,9 @@ export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?:
     const doNotAddIdx: number[] = [];
     const susIdx: number[] = [];
 
-    for (let i = 0; i < lfmArtists.artists.length; i++) {
+    for (let i = 0; i < lfmArtists.length; i++) {
         // Don't try to re-add artists the user already likes
-        if (existingIDs.has(lfmArtists.artists[i].id)) {
+        if (existingIDs.has(lfmArtists[i].id)) {
             doNotAddIdx.push(i);
         } else if (!lfmArtists[i].id || !lfmArtists[i].id.length) {
             // const bestMatch = await throttleQueue.enqueue(() => mbArtistSearch(lfmArtists[i].name, 1));
