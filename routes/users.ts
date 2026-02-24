@@ -2,7 +2,7 @@ import express from "express";
 import {getUserData, verifyAccessCode} from "../controllers/getFromDB";
 import {
     addLFMtoUser,
-    addUserLikedArtist,
+    addUserLikedArtist, removeLastFMFromUser,
     removeUserLikedArtist,
     submitFeedback,
     updateUserPreferences, verifyLastFMUser
@@ -134,6 +134,16 @@ router.put('/lastfm/:userID/:lfmusername', async (req, res) => {
     } catch (err) {
         console.error('Failed to connect last.fm:', err);
         res.status(500).json({ error: `Failed to connect last.fm: ${err}` });
+    }
+});
+
+router.put('/lastfm/remove/user/:userID', async (req, res) => {
+    try {
+        await removeLastFMFromUser(req.params.userID);
+        res.status(200).end();
+    } catch (err) {
+        console.error('Failed to remove last.fm:', err);
+        res.status(500).json({ error: `Failed to remove last.fm: ${err}` });
     }
 });
 

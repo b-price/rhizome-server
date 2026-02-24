@@ -334,6 +334,19 @@ export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?:
     //console.log('Less poorly-matched artists: ', lfmArtists.length);
     await collections.users?.updateOne(
         { id: userID },
-        { $push: { liked: { $each: lfmArtists } } as unknown as PushOperator<Document> }
+        { $push: { liked: { $each: lfmArtists.map((a: { id: any; date: any; playcount: any; lastFM: any; }) => ({
+                        id: a.id,
+                        date: a.date,
+                        playcount: a.playcount,
+                        lastFM: a.lastFM,
+                    })) } } as unknown as PushOperator<Document> }
     );
+}
+
+export async function removeLastFMFromUser(userID: string) {
+    const user = await collections.users?.findOne({ id: userID });
+    if (!user) throw new Error('No user found.');
+    if (!user.lfmUsername) throw new Error('User has no linked last.fm account.');
+    await collections.users?.updateOne({ id: userID }, { $unset: { lfmUsername: null } });
+    await collections.users?.updateOne({id: userID}, { $pull: { liked: { lastFM: true } } as unknown as PushOperator<Document> });
 }

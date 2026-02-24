@@ -7,7 +7,7 @@ export async function fetchLastFMUserArtists(lfmUsername: string, limitPerPage =
     try {
         const firstResponse = await axios.get(`${BASE_URL}${lfmUsername}${URL_CONFIG}${limitPerPage}`);
         const artists = firstResponse.data.artists.artist.map((artist: { mbid: string; name: string; playcount: string; }) => {
-            return { id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date };
+            return { id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true };
         });
         let page = 1;
         const totalArtists = firstResponse.data.artists["@attr"].total;
@@ -16,7 +16,7 @@ export async function fetchLastFMUserArtists(lfmUsername: string, limitPerPage =
             page++;
             const response = await axios.get(`${BASE_URL}${lfmUsername}${URL_CONFIG}${limitPerPage}&page=${page}`);
             for (const artist of response.data.artists.artist) {
-                artists.push({ id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date });
+                artists.push({ id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true });
             }
         }
         return {artists, totalArtists};

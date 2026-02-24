@@ -187,6 +187,8 @@ export interface ArtistLike {
     id: string;
     date: Date;
     playcount?: number;
+    name?: string;
+    lastFM?: boolean;
 }
 
 export type PreviewTrigger = 'modifier' | 'delay';
