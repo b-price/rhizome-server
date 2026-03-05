@@ -137,9 +137,10 @@ router.put('/lastfm/:userID/:lfmusername', async (req, res) => {
     }
 });
 
-router.put('/lastfm/remove/user/:userID', async (req, res) => {
+router.put('/lastfm/remove/user/:userID/:removeArtists', async (req, res) => {
     try {
-        await removeLastFMFromUser(req.params.userID);
+        const removeArtists = req.params.removeArtists === 'true';
+        await removeLastFMFromUser(req.params.userID, removeArtists);
         res.status(200).end();
     } catch (err) {
         console.error('Failed to remove last.fm:', err);

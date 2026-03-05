@@ -343,10 +343,12 @@ export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?:
     );
 }
 
-export async function removeLastFMFromUser(userID: string) {
+export async function removeLastFMFromUser(userID: string, removeArtists: boolean) {
     const user = await collections.users?.findOne({ id: userID });
     if (!user) throw new Error('No user found.');
     if (!user.lfmUsername) throw new Error('User has no linked last.fm account.');
     await collections.users?.updateOne({ id: userID }, { $unset: { lfmUsername: null } });
-    await collections.users?.updateOne({id: userID}, { $pull: { liked: { lastFM: true } } as unknown as PushOperator<Document> });
+    if (removeArtists) {
+        await collections.users?.updateOne({id: userID}, { $pull: { liked: { lastFM: true } } as unknown as PushOperator<Document> });
+    }
 }
