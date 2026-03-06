@@ -296,54 +296,25 @@ export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?:
     const lfmArtists = lfmArtistsData.artists;
     const projection = { "liked.id": 1, _id: 0 };
     const user = await collections.users?.findOne({ id: userID }, { projection });
-
     const existingIDs = new Set((user?.liked ?? []).map((a: ArtistLike) => a.id));
-    const doNotAddIdx: number[] = [];
-    const susIdx: number[] = [];
+    const artistsToAdd: { id: any; date: any; playcount: any; lastFM: any; }[] = [];
 
-    for (let i = 0; i < lfmArtists.length; i++) {
-        // Don't try to re-add artists the user already likes
-        if (existingIDs.has(lfmArtists[i].id)) {
-            doNotAddIdx.push(i);
-        } else if (!lfmArtists[i].id || !lfmArtists[i].id.length) {
-            // const bestMatch = await throttleQueue.enqueue(() => mbArtistSearch(lfmArtists[i].name, 1));
-            const bestMatch = await matchArtistNameInDB(lfmArtists[i].name, 1);
-            if (bestMatch && bestMatch[0] && bestMatch[0].id) {
-                //console.log(`Found match for ${lfmArtists[i].name}: ${bestMatch[0].name}, ${bestMatch[0].startDate}, ${bestMatch[0].location}`);
-                if (!artistNamesMatch(lfmArtists[i].name, bestMatch[0].name)) {
-                    susIdx.push(i);
-                    //console.log('(But the name is not an exact match)');
+    for (const artist of lfmArtists) {
+        if (!artist.id) {
+            const bestMatch = await matchArtistNameInDB(artist.name, 1);
+            if (bestMatch && bestMatch[0] && bestMatch[0].id && !existingIDs.has(bestMatch[0].id)) {
+                if (addSusNames || artistNamesMatch(artist.name, bestMatch[0].name)) {
+                    artistsToAdd.push({ id: bestMatch[0].id, date: artist.date, playcount: artist.playcount, lastFM: true });
                 }
-                lfmArtists[i].id = bestMatch[0].id;
-                // Don't try to re-add the found newly-found id if already liked
-                if (existingIDs.has(lfmArtists[i].id)) {
-                    doNotAddIdx.push(i);
-                }
-            } else {
-                //console.log('no artist found with name ', lfmArtists[i].name);
-                doNotAddIdx.push(i);
             }
+        } else if (!existingIDs.has(artist.id)) {
+            artistsToAdd.push({ id: artist.id, date: artist.date, playcount: artist.playcount, lastFM: true })
         }
     }
-    //console.log('Total artists found: ', lfmArtists.length);
-    for (const index of doNotAddIdx) {
-        lfmArtists.splice(index, 1);
-    }
-    //console.log('Less not-found artists: ', lfmArtists.length);
-    if (!addSusNames) {
-        for (const index of susIdx) {
-            lfmArtists.splice(index, 1);
-        }
-    }
-    //console.log('Less poorly-matched artists: ', lfmArtists.length);
+
     await collections.users?.updateOne(
         { id: userID },
-        { $push: { liked: { $each: lfmArtists.map((a: { id: any; date: any; playcount: any; lastFM: any; }) => ({
-                        id: a.id,
-                        date: a.date,
-                        playcount: a.playcount,
-                        lastFM: a.lastFM,
-                    })) } } as unknown as PushOperator<Document> }
+        { $push: { liked: { $each: artistsToAdd } } as unknown as PushOperator<Document> }
     );
 }
 
