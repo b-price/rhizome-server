@@ -4,7 +4,7 @@ import {
     addLFMtoUser,
     addUserLikedArtist, removeLastFMFromUser,
     removeUserLikedArtist,
-    submitFeedback,
+    submitFeedback, updateUserLikesFromLastFM,
     updateUserPreferences, verifyLastFMUser
 } from "../controllers/writeToDB";
 import {getLFMAuthUrl, lastfmAuthHandler} from "../controllers/lastfmAuth";
@@ -145,6 +145,16 @@ router.put('/lastfm/remove/user/:userID/:removeArtists', async (req, res) => {
     } catch (err) {
         console.error('Failed to remove last.fm:', err);
         res.status(500).json({ error: `Failed to remove last.fm: ${err}` });
+    }
+});
+
+router.put('/lastfm/sync/:userID/:lfmusername', async (req, res) => {
+    try {
+        await updateUserLikesFromLastFM(req.params.userID, req.params.lfmusername);
+        res.status(200).end();
+    } catch (err) {
+        console.error('Failed to sync last.fm:', err);
+        res.status(500).json({ error: `Failed to sync last.fm: ${err}` });
     }
 });
 

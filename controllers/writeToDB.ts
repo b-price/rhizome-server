@@ -350,5 +350,7 @@ export async function removeLastFMFromUser(userID: string, removeArtists: boolea
     await collections.users?.updateOne({ id: userID }, { $unset: { lfmUsername: null } });
     if (removeArtists) {
         await collections.users?.updateOne({id: userID}, { $pull: { liked: { lastFM: true } } as unknown as PushOperator<Document> });
+    } else {
+        await collections.users?.updateOne({ id: userID }, { $unset: { 'liked.$[].lastFM': null } });
     }
 }
