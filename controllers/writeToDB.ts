@@ -315,6 +315,10 @@ export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?:
                     //console.log('(But the name is not an exact match)');
                 }
                 lfmArtists[i].id = bestMatch[0].id;
+                // Don't try to re-add the found newly-found id if already liked
+                if (existingIDs.has(lfmArtists[i].id)) {
+                    doNotAddIdx.push(i);
+                }
             } else {
                 //console.log('no artist found with name ', lfmArtists[i].name);
                 doNotAddIdx.push(i);
