@@ -362,6 +362,8 @@ export async function syncLastFM(userID: string, force = false, customSyncInterv
                     ]
                 );
             }
+        } else {
+            await collections.users?.updateOne({ id: userID }, { $set: { lfmLastSync: new Date() } });
         }
     }
 }
