@@ -206,6 +206,7 @@ export interface User {
     preferences: Preferences;
     socialUser?: boolean;
     lfmUsername?: string;
+    lfmLastSync?: Date;
 }
 
 export interface Feedback {

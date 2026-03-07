@@ -47,3 +47,5 @@ export const ACCESS_CODES_EMAIL_POST_CODE_HTML = `</p><p><strong><a href=3D"http
 .fyi/" target=3D"_blank">Launch Rhizome =E2=86=92</a></strong></p><p><br>Ex=
 cited to see what you discover!</p><p>Sean &amp; Ben</p></div>
 `;
+
+export const LFM_SYNC_INTERVAL = 7 * 24 * 60 * 60 * 1000;

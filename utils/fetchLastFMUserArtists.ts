@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const BASE_URL = `${process.env.LASTFM_URL}?method=library.getartists&user=`;
+const BASE_URL_ALL = `${process.env.LASTFM_URL}?method=library.getartists&user=`;
+const BASE_URL_WEEKLY = `${process.env.LASTFM_URL}?method=user.getWeeklyArtistChart&user=`;
 const URL_CONFIG = `&api_key=${process.env.LASTFM_API_KEY}&format=json&limit=`;
 
 export async function fetchLastFMUserArtists(lfmUsername: string, limitPerPage = 200, pageLimit = 0) {
     try {
-        const firstResponse = await axios.get(`${BASE_URL}${lfmUsername}${URL_CONFIG}${limitPerPage}`);
+        const firstResponse = await axios.get(`${BASE_URL_ALL}${lfmUsername}${URL_CONFIG}${limitPerPage}`);
         const artists = firstResponse.data.artists.artist.map((artist: { mbid: string; name: string; playcount: string; }) => {
             return { id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true };
         });
@@ -14,7 +15,7 @@ export async function fetchLastFMUserArtists(lfmUsername: string, limitPerPage =
         const pageCount = pageLimit ? pageLimit : firstResponse.data.artists["@attr"].totalPages;
         while (page < pageCount) {
             page++;
-            const response = await axios.get(`${BASE_URL}${lfmUsername}${URL_CONFIG}${limitPerPage}&page=${page}`);
+            const response = await axios.get(`${BASE_URL_ALL}${lfmUsername}${URL_CONFIG}${limitPerPage}&page=${page}`);
             for (const artist of response.data.artists.artist) {
                 artists.push({ id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true });
             }
@@ -36,4 +37,12 @@ export async function lastFMUserPreview(lfmUsername: string, artistCount = 5) {
         totalArtists = rawArtists.totalArtists;
     }
     return { lfmUsername, topArtists: artistNames, totalArtists };
+}
+
+export async function fetchRecentLastFMUserArtists(lfmUsername: string, since: number) {
+    const now = Math.floor(new Date().getTime() / 1000);
+    const response = await axios.get(`${BASE_URL_WEEKLY}${lfmUsername}${URL_CONFIG}&from=${since}&to=${now}`);
+    return response.data.weeklyartistchart.artist.map((artist: { mbid: string; name: string; playcount: string; }) => {
+        return { id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true };
+    });
 }
