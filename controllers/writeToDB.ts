@@ -269,10 +269,10 @@ export async function setCodeAccessed(code: string, accessed: boolean) {
 
 export async function addLFMtoUser(userID: string, lfmUsername: string, updateLiked = true) {
     if (await verifyLastFMUser(lfmUsername)) {
-        await collections.users?.updateOne({id: userID}, { $set: { lfmUsername: lfmUsername, lfmLastSync: new Date() } });
         if (updateLiked) {
             await updateUserLikesFromLastFM(userID, lfmUsername);
         }
+        await collections.users?.updateOne({id: userID}, { $set: { lfmUsername: lfmUsername, lfmLastSync: new Date() } });
     } else {
         throw new Error(`Last.fm user ${lfmUsername} not found.`);
     }
