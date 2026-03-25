@@ -48,4 +48,4 @@ export const ACCESS_CODES_EMAIL_POST_CODE_HTML = `</p><p><strong><a href=3D"http
 cited to see what you discover!</p><p>Sean &amp; Ben</p></div>
 `;
 
-export const LFM_SYNC_INTERVAL = 7 * 24 * 60 * 60 * 1000;
+export const LFM_SYNC_INTERVAL = 1 * 24 * 60 * 60 * 1000;
