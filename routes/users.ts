@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 import {getUserData} from "../controllers/getFromDB";
 import {
     addUserLikedArtist,
@@ -63,6 +64,35 @@ router.put('/preferences', async (req, res) => {
     } catch (err) {
         console.error('Failed to update user preferences:', err);
         res.status(500).json({ error: 'Failed to update user preferences' });
+    }
+});
+
+router.get('/lastfm/recenttracks/:username', async (req, res) => {
+    const { username } = req.params;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    const apiKey = process.env.LASTFM_API_KEY;
+    if (!apiKey) {
+        res.status(503).json({ error: 'Last.fm not configured' });
+        return;
+    }
+    try {
+        const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${encodeURIComponent(username)}&api_key=${apiKey}&format=json&limit=${limit}`;
+        const { data } = await axios.get(url);
+        const raw: any[] = data?.recenttracks?.track ?? [];
+        const tracks = raw
+            .filter((t) => t?.name && t?.artist?.['#text'])
+            .map((t) => ({
+                name: t.name,
+                artist: t.artist['#text'],
+                album: t.album?.['#text'] ?? '',
+                timestamp: t.date?.uts ? parseInt(t.date.uts, 10) * 1000 : Date.now(),
+                nowPlaying: t['@attr']?.nowplaying === 'true',
+                imageUrl: t.image?.find((img: any) => img.size === 'medium')?.['#text'] ?? null,
+            }));
+        res.json({ tracks });
+    } catch (err) {
+        console.error('Failed to fetch Last.fm recent tracks:', err);
+        res.status(500).json({ error: 'Failed to fetch Last.fm data' });
     }
 });
 
