@@ -3,6 +3,7 @@ import {
     getArtistByName,
     getArtistDataFiltered,
     getArtistFromID,
+    getArtistsByDecades,
     getDuplicateArtists, getDuplicateArtistsNames,
     getGenreArtistData,
     getMultipleArtists,
@@ -247,6 +248,27 @@ router.post('/filtered-genres', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch artists from genres:', err);
         res.status(500).json({ error: 'Failed to fetch artists from genres' });
+    }
+});
+
+// Fetches artists active during the given decades, optionally filtered by genre
+router.post('/by-decades', async (req, res) => {
+    const { decades, filter, amount, genres } = req.body;
+    if (!decades?.length || !filter || !amount || parseInt(amount) < 1) {
+        res.status(400).json({ error: 'Invalid request body' });
+        return;
+    }
+    try {
+        const artistData = await getArtistsByDecades(
+            decades,
+            filter as FilterField,
+            parseInt(amount),
+            genres
+        );
+        res.json(artistData);
+    } catch (err) {
+        console.error('Failed to fetch artists by decades:', err);
+        res.status(500).json({ error: 'Failed to fetch artists by decades' });
     }
 });
 
