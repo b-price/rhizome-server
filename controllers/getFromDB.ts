@@ -673,6 +673,72 @@ export async function findArtistsWithinDegrees(
     return results;
 }
 
+function buildDecadeCondition(startYear: number, endYear: number) {
+    return {
+        $and: [
+            { $lte: [{ $toInt: { $substr: ["$startDate", 0, 4] } }, endYear] },
+            {
+                $or: [
+                    { $not: { $gt: [{ $strLenCP: { $ifNull: ["$endDate", ""] } }, 3] } },
+                    { $gte: [{ $toInt: { $substr: ["$endDate", 0, 4] } }, startYear] }
+                ]
+            }
+        ]
+    };
+}
+
+export async function getArtistsByDecades(
+    decades: string[],
+    filter: FilterField,
+    amount: number,
+    genreIDs?: string[]
+) {
+    const decadeConditions = decades.map(d => {
+        const startYear = parseInt(d.replace('s', ''));
+        return buildDecadeCondition(startYear, startYear + 9);
+    });
+
+    const matchStage: Record<string, unknown> = {
+        startDate: { $exists: true, $nin: [null, ""] },
+        [filter]: { $type: "number" },
+        $expr: {
+            $and: [
+                { $gt: [{ $strLenCP: "$startDate" }, 3] },
+                decadeConditions.length === 1 ? decadeConditions[0] : { $or: decadeConditions }
+            ]
+        }
+    };
+
+    if (genreIDs?.length) {
+        matchStage.genres = { $in: genreIDs };
+    }
+
+    const artists = await collections.artists
+        ?.find(matchStage)
+        .sort({ [filter]: -1 })
+        .limit(amount)
+        .toArray();
+
+    const countMatch: Record<string, unknown> = {
+        startDate: { $exists: true, $nin: [null, ""] },
+        $expr: {
+            $and: [
+                { $gt: [{ $strLenCP: "$startDate" }, 3] },
+                decadeConditions.length === 1 ? decadeConditions[0] : { $or: decadeConditions }
+            ]
+        }
+    };
+    if (genreIDs?.length) countMatch.genres = { $in: genreIDs };
+
+    const count = await collections.artists?.countDocuments(countMatch);
+
+    return {
+        artists,
+        count,
+        links: createArtistLinksLessCPU(artists as unknown as Artist[]),
+    };
+}
+
 export async function verifyAccessCode(code: string, userEmail: string) {
     const accessCode = await collections.accessCodes?.findOne({ userEmail: userEmail.toLowerCase() });
     const isValid = accessCode ? accessCode.code === code || accessCode.accessed : false;
