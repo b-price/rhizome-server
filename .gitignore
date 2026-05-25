@@ -8,3 +8,5 @@ data/exampleSchema
 .env
 dist
 /data/genres/sameNameArtists.json
+
+.vscode
