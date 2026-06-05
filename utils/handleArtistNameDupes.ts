@@ -4,6 +4,10 @@ import axios from "axios";
 const LASTFM_URL = `${process.env.LASTFM_URL}?method=artist.getinfo&`;
 const URL_CONFIG = `&api_key=${process.env.LASTFM_API_KEY}&format=json`;
 
+export async function findArtistNameDupes(limit = 5000) {
+
+}
+
 export async function processSingleArtistNameDupes(name: string, mbid?: string) {
     if (mbid) {
 
@@ -14,9 +18,11 @@ export async function processSingleArtistNameDupes(name: string, mbid?: string) 
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i].noMBID) {
                     const lastFMData = await axios.get(`${LASTFM_URL}mbid=${artists[i].id}${URL_CONFIG}`);
+                    // Last.fm has a mbid for this artist
                     if (lastFMData && !('error' in lastFMData.data)) {
                         hasLfmIdx.push(i);
                     }
+
                 }
             }
         }

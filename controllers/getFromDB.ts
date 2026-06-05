@@ -3,6 +3,8 @@ import {Artist, Genre, ParentField, LinkType, FilterField, BasicItem} from "../t
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 import {ObjectId} from "mongodb";
 import {setCodeAccessed} from "./writeToDB";
+import throttleQueue from "../utils/throttleQueue";
+import {mbLookup} from "./mbLookup";
 
 export async function getAllGenresFromDB() {
     return await collections.genres?.find({}).toArray() as unknown as Genre[];
@@ -599,6 +601,19 @@ export async function getUserData(id: string) {
 
 export async function getMultipleArtists(artists: string[]){
     const artistData =  await collections.artists?.find({ id: { $in: artists } }).toArray();
+    // For testing: delete
+    // const fetchedIDs = artistData?.map(a => a.id)
+    // for (const artist of artists) {
+    //     if (fetchedIDs && !fetchedIDs.includes(artist)) {
+    //         console.log(artist + " not found in DB, looking up via musicbrainz...")
+    //         const missingData = await throttleQueue.enqueue(() => mbLookup(artist, 'artist'))
+    //         if (missingData) {
+    //             console.log(missingData)
+    //         } else {
+    //             console.log('Not found in MB!')
+    //         }
+    //     }
+    // }
     return {
         artists: artistData,
         links: createArtistLinksLessCPU(artistData as unknown as Artist[]),
