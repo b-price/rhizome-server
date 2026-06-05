@@ -167,10 +167,19 @@ export async function getArtistFromID(id: string) {
 export async function getSimilarArtistsFromArray(artists: string[]) {
     const similarArtists: Artist[] = [];
     for (const artist of artists) {
-        const similarArtist = await collections.artists?.findOne({name: artist}) as unknown as Artist;
+        const similarArtist = await getArtistByName(artist);
         if (similarArtist) {
             similarArtists.push(similarArtist);
         }
+        // let similarArtist = await collections.artists?.findOne({name: artist}) as unknown as Artist;
+        // if (similarArtist) {
+        //     similarArtists.push(similarArtist);
+        // } else {
+        //     similarArtist = await getArtistByName(artist) as unknown as Artist;
+        //     if (similarArtist) {
+        //         similarArtists.push(similarArtist);
+        //     }
+        // }
     }
     return similarArtists;
 }
@@ -189,8 +198,25 @@ export async function matchArtistNameInDB(query: string, limit = 10) {
     return collections.artists?.aggregate(searchQuery).toArray();
 }
 
-export async function getArtistByName(name: string) {
+export async function getArtistByExactName(name: string) {
     return await collections.artists?.findOne({ name: name });
+}
+
+// Gets an artist by exact name; failing that tries to find by search (with name match check)
+export async function getArtistByName(name: string) {
+    const exactResult = await getArtistByExactName(name) as unknown as Artist;
+    if (exactResult && exactResult.name) {
+        return exactResult;
+    } else {
+        const result = await matchArtistNameInDB(name, 5);
+        if (result && result.length > 0) {
+            for (const artist of result) {
+                if (artist.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()) {
+                    return artist as unknown as Artist;
+                }
+            }
+        }
+    }
 }
 
 export async function getSimilarArtistsFromArtist(artistId: string) {
