@@ -171,15 +171,6 @@ export async function getSimilarArtistsFromArray(artists: string[]) {
         if (similarArtist) {
             similarArtists.push(similarArtist);
         }
-        // let similarArtist = await collections.artists?.findOne({name: artist}) as unknown as Artist;
-        // if (similarArtist) {
-        //     similarArtists.push(similarArtist);
-        // } else {
-        //     similarArtist = await getArtistByName(artist) as unknown as Artist;
-        //     if (similarArtist) {
-        //         similarArtists.push(similarArtist);
-        //     }
-        // }
     }
     return similarArtists;
 }
