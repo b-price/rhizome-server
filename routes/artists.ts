@@ -1,6 +1,6 @@
 import express from "express";
 import {
-    getArtistByName,
+    getArtistByExactName, getArtistByName,
     getArtistDataFiltered,
     getArtistFromID,
     getArtistsByDecades,
