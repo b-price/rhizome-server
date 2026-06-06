@@ -655,45 +655,46 @@ export async function findArtistsByHops(
 ) {
     if (!seedIds?.length || hops < 1 || limit < 1) return [];
 
-    const genreMatchStage = genreFilter?.length
-        ? [{ $match: { "reached.genres": { $in: genreFilter } } }]
-        : [];
+    const seedIdSet = new Set(seedIds);
+    const results: (Artist & { hopDistance: number })[] = [];
+    const seenIds = new Set(seedIds);
 
-    const pipeline = [
-        { $match: { id: { $in: seedIds } } },
-        {
-            $graphLookup: {
-                from: "Artists",
-                startWith: "$similar",
-                connectFromField: "similar",
-                connectToField: "name",
-                as: "reached",
-                maxDepth: hops - 1,
-                depthField: "hopDegree"
-            }
-        },
-        { $project: { reached: 1 } },
-        { $unwind: "$reached" },
-        { $match: { "reached.id": { $nin: seedIds } } },
-        ...genreMatchStage,
-        {
-            $group: {
-                _id: "$reached.id",
-                doc: { $first: "$reached" },
-                hopDegree: { $min: "$reached.hopDegree" }
-            }
-        },
-        { $sort: { hopDegree: 1, "doc.name": 1 } },
-        { $limit: limit },
-        {
-            $replaceWith: {
-                $mergeObjects: ["$doc", { hopDistance: { $add: ["$hopDegree", 1] } }]
+    // Iterative hop expansion: union similar-name sets, then look up matching artists.
+    // Avoids $graphLookup from a large seed set which creates enormous intermediate results.
+    let currentIds = seedIds;
+
+    for (let hop = 1; hop <= hops; hop++) {
+        // Collect all similar-name strings from the current frontier
+        const nameRows = await collections.artists
+            ?.find({ id: { $in: currentIds } }, { projection: { similar: 1 } })
+            .toArray() ?? [];
+
+        const candidateNames = [...new Set(nameRows.flatMap(r => (r as any).similar ?? []))];
+        if (!candidateNames.length) break;
+
+        // Find artists whose name is in the candidate set and not already seen
+        const matchPipeline: object[] = [
+            { $match: { name: { $in: candidateNames }, id: { $nin: [...seenIds] } } },
+            ...(genreFilter?.length ? [{ $match: { genres: { $in: genreFilter } } }] : []),
+            { $limit: limit - results.length },
+        ];
+
+        const hopArtists = await collections.artists
+            ?.aggregate<Artist>(matchPipeline)
+            .toArray() ?? [];
+
+        for (const artist of hopArtists) {
+            if (!seenIds.has(artist.id)) {
+                results.push({ ...artist, hopDistance: hop });
+                seenIds.add(artist.id);
             }
         }
-    ];
 
-    const results = await collections.artists?.aggregate<(Artist & { hopDistance: number })>(pipeline).toArray();
-    return results ?? [];
+        currentIds = hopArtists.map(a => a.id);
+        if (results.length >= limit || !currentIds.length) break;
+    }
+
+    return results;
 }
 
 function buildDecadeCondition(startYear: number, endYear: number) {

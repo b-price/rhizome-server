@@ -307,7 +307,9 @@ router.post('/hops', async (req, res) => {
         if (!artistIds?.length || !hopDepth || hopDepth < 1) {
             throw new Error('Invalid parameters');
         }
+        console.log('[hops] request', { seedCount: artistIds.length, hopDepth, limit, genres });
         const hopArtists = await findArtistsByHops(artistIds, hopDepth, limit ?? 300, genres);
+        console.log('[hops] result', { hopArtistCount: hopArtists.length });
         const links = createArtistLinksLessCPU(hopArtists as any);
         res.json({ artists: hopArtists, links });
     } catch (err) {
