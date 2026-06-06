@@ -655,12 +655,12 @@ export async function findArtistsByHops(
 ) {
     if (!seedIds?.length || hops < 1 || limit < 1) return [];
 
-    const seedIdSet = new Set(seedIds);
     const results: (Artist & { hopDistance: number })[] = [];
     const seenIds = new Set(seedIds);
 
     // Iterative hop expansion: union similar-name sets, then look up matching artists.
     // Avoids $graphLookup from a large seed set which creates enormous intermediate results.
+    // Each hop gets its own limit so a large seed set saturating hop 1 doesn't prevent hop 2+.
     let currentIds = seedIds;
 
     for (let hop = 1; hop <= hops; hop++) {
@@ -676,7 +676,7 @@ export async function findArtistsByHops(
         const matchPipeline: object[] = [
             { $match: { name: { $in: candidateNames }, id: { $nin: [...seenIds] } } },
             ...(genreFilter?.length ? [{ $match: { genres: { $in: genreFilter } } }] : []),
-            { $limit: limit - results.length },
+            { $limit: limit },
         ];
 
         const hopArtists = await collections.artists
@@ -691,7 +691,7 @@ export async function findArtistsByHops(
         }
 
         currentIds = hopArtists.map(a => a.id);
-        if (results.length >= limit || !currentIds.length) break;
+        if (!currentIds.length) break;
     }
 
     return results;
