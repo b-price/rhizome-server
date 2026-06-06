@@ -6,10 +6,11 @@ import genreArtists from "./routes/artists";
 import search from "./routes/search";
 import initializeDB from "./routes/dbInit";
 import users from "./routes/users";
+import admin from "./routes/admin";
 import {connectDB} from "./db/connection";
 import {auth} from "./utils/auth";
 import { toNodeHandler } from "better-auth/node";
-import {FRONTEND_DEPLOYMENT_URL} from "./utils/urls";
+import {corsOptions} from "./utils/cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,23 +18,18 @@ const PORT = process.env.PORT || 3000;
 // app.all('/api/auth/{*any}', toNodeHandler(auth));
 connectDB().then(v => {
     app.all('/api/auth/{*any}', toNodeHandler(auth()));
-
 });
 
 app.use(express.json());
-app.use(cors({
-    origin: FRONTEND_DEPLOYMENT_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+app.use(cors(corsOptions));
 
 app.use('/genres', genres);
 app.use('/artists', genreArtists);
 app.use('/search', search);
 app.use('/initializeDB', initializeDB);
 app.use('/users', users);
+app.use('/admin', admin);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-
 });

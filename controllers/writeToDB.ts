@@ -1,12 +1,18 @@
 import {collections} from "../db/connection";
-import {getAllGenresFromDB, getGenreRoots, getTopArtists} from "./getFromDB";
+import {getAllGenresFromDB, getGenreRoots, getTopArtists, matchArtistNameInDB} from "./getFromDB";
 import {getGeneralRootsOfGenre, getSpecificRootsOfGenre} from "../utils/rootGenres";
 import {ObjectId, PushOperator} from "mongodb";
-import {BadDataReport, Feedback, Genre, Preferences, TopTrack} from "../types";
+import {ArtistLike, BadDataReport, Feedback, Genre, Preferences, TopTrack} from "../types";
 import {topTracksArtist} from "./lastFMTopTracks";
 import {getYoutubeTrackID} from "./youTubeTopTracks";
 import {getSpotifyTrackID} from "./spotifyTopTracks";
-import {DEFAULT_USER_PREFERENCES} from "../utils/defaults";
+import {DEFAULT_USER_PREFERENCES, LFM_SYNC_INTERVAL} from "../utils/defaults";
+import {generateAccessCodes} from "../utils/generateAccessCodes";
+import {fetchLastFMUserArtists, fetchRecentLastFMUserArtists} from "../utils/fetchLastFMUserArtists";
+import {mbArtistSearch} from "./mbArtistSearch";
+import {checkLastFMUsername} from "../utils/checkLastFMUsername";
+import throttleQueue from "../utils/throttleQueue";
+import {artistNamesMatch, processLfmArtists} from "../utils/parsing";
 
 export async function flipBadDataGenre(genreID: string, reason: string) {
     await collections.genres?.updateOne({ id: genreID }, [
@@ -222,7 +228,7 @@ export async function addTopTracksToAllGenreTopArtists() {
 }
 
 export async function createUserData(id: string, socialUser?: boolean) {
-    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser: socialUser });
+    await collections.users?.insertOne({ id: id, liked: [], preferences: DEFAULT_USER_PREFERENCES, socialUser });
 }
 
 export async function deleteUserData(id: string) {
@@ -246,4 +252,118 @@ export async function updateUserPreferences(id: string, preferences: Preferences
 
 export async function submitFeedback(feedback: Feedback) {
     await collections.feedback?.insertOne(feedback);
+}
+
+export async function writeAccessCodes(emails: string[], phase: string, version: string) {
+    const codes = generateAccessCodes(emails, phase, version);
+    await collections.accessCodes?.insertMany(codes);
+}
+
+export async function assignUserToAccessCode(userID: string, code: string) {
+    await collections.accessCodes?.updateOne({ code }, { $set: { userID } });
+}
+
+export async function setCodeAccessed(code: string, accessed: boolean) {
+    await collections.accessCodes?.updateOne({ code }, { $set: { accessed } });
+}
+
+export async function addLFMtoUser(userID: string, lfmUsername: string, updateLiked = true) {
+    if (await verifyLastFMUser(lfmUsername)) {
+        if (updateLiked) {
+            await updateUserLikesFromLastFM(userID, lfmUsername);
+        }
+        await collections.users?.updateOne({id: userID}, { $set: { lfmUsername: lfmUsername, lfmLastSync: new Date() } });
+    } else {
+        throw new Error(`Last.fm user ${lfmUsername} not found.`);
+    }
+}
+
+export async function verifyLastFMUser(lfmUsername: string) {
+    const user = await checkLastFMUsername(lfmUsername);
+    return (user && user.name);
+}
+
+export async function getLastFMUsername(userID: string) {
+    const user = await collections.users?.findOne({ userID });
+    if (user && user.lfmUsername) return user.lfmUsername;
+}
+
+export async function updateUserLikesFromLastFM(userID: string, lastfmUsername?: string, addSusNames = false) {
+    const lfmUsername = lastfmUsername ? lastfmUsername : await getLastFMUsername(userID);
+    if (!lfmUsername) throw new Error('No last.fm username found.');
+    const lfmArtistsData = await fetchLastFMUserArtists(lfmUsername);
+    if (!lfmArtistsData || !lfmArtistsData.artists.length) throw new Error('No artists found in user last.fm account.');
+    const lfmArtists = lfmArtistsData.artists;
+    const projection = { "liked.id": 1, _id: 0 };
+    const user = await collections.users?.findOne({ id: userID }, { projection });
+    if (!user) throw new Error('No user found.');
+    const artistsToAdd = await processLfmArtists(lfmArtists, user.liked);
+
+    await collections.users?.updateOne(
+        { id: userID },
+        { $push: { liked: { $each: artistsToAdd } } as unknown as PushOperator<Document> }
+    );
+}
+
+export async function removeLastFMFromUser(userID: string, removeArtists: boolean) {
+    const user = await collections.users?.findOne({ id: userID });
+    if (!user) throw new Error('No user found.');
+    if (!user.lfmUsername) throw new Error('User has no linked last.fm account.');
+    await collections.users?.updateOne({ id: userID }, { $unset: { lfmUsername: null } });
+    if (removeArtists) {
+        await collections.users?.updateOne({id: userID}, { $pull: { liked: { lastFM: true } } as unknown as PushOperator<Document> });
+    } else {
+        await collections.users?.updateOne({ id: userID }, { $unset: { 'liked.$[].lastFM': null } });
+    }
+}
+
+function isStaleDate(dateToCheck: Date, syncInterval: number, now = new Date()) {
+    return now.getTime() - dateToCheck.getTime() > syncInterval;
+}
+
+export async function syncLastFM(userID: string, force = false, customSyncInterval = LFM_SYNC_INTERVAL) {
+    const syncInterval = force ? 0 : customSyncInterval;
+    const now = new Date();
+    const user = await collections.users?.findOne({ id: userID });
+    if (!user) throw new Error('No user found.');
+    if (!user.lfmUsername) throw new Error('User has no linked last.fm account.');
+    if (user.lfmLastSync && isStaleDate(user.lfmLastSync, syncInterval, now)) {
+        const freshArtists = await fetchRecentLastFMUserArtists(user.lfmUsername, Math.floor(user.lfmLastSync.getTime() / 1000));
+        if (freshArtists && freshArtists.length) {
+            const artistsToAdd = await processLfmArtists(freshArtists, user.liked, false, true);
+            if (artistsToAdd && artistsToAdd.length) {
+                await collections.users?.updateOne(
+                    { id: userID },
+                    [
+                        {
+                            $set: {
+                                liked: {
+                                    $concatArrays: [
+                                        {
+                                            $filter: {
+                                                input: "$liked",
+                                                as: "existing",
+                                                cond: {
+                                                    $not: {
+                                                        $in: [
+                                                            "$$existing.id",
+                                                            artistsToAdd.map(a => a.id)
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        artistsToAdd
+                                    ]
+                                },
+                                lfmLastSync: new Date()
+                            }
+                        }
+                    ]
+                );
+            }
+        } else {
+            await collections.users?.updateOne({ id: userID }, { $set: { lfmLastSync: new Date() } });
+        }
+    }
 }

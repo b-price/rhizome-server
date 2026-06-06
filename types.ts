@@ -186,11 +186,18 @@ export interface TopTrackPlayIDs {
 export interface ArtistLike {
     id: string;
     date: Date;
+    playcount?: number;
+    name?: string;
+    lastFM?: boolean;
 }
+
+export type PreviewTrigger = 'modifier' | 'delay';
 
 export interface Preferences {
     theme?: 'light' | 'dark' | 'system';
     player?: 'youtube' | 'spotify' | 'apple';
+    enableGraphCards?: boolean;
+    previewTrigger?: PreviewTrigger;
 }
 
 export interface User {
@@ -198,6 +205,8 @@ export interface User {
     liked: ArtistLike[];
     preferences: Preferences;
     socialUser?: boolean;
+    lfmUsername?: string;
+    lfmLastSync?: Date;
 }
 
 export interface Feedback {
@@ -205,4 +214,18 @@ export interface Feedback {
     userID: string;
     email?: string;
     resolved: boolean;
+}
+
+export interface AccessCode {
+    code: string;
+    userEmail?: string;
+    userID?: string;
+    phase: string;
+    version: string;
+    accessed?: boolean;
+}
+
+export interface Decade {
+    startYear: number;
+    endYear: number;
 }

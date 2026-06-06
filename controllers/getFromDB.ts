@@ -2,9 +2,16 @@ import {collections} from "../db/connection";
 import {Artist, Genre, ParentField, LinkType, FilterField, BasicItem} from "../types";
 import {createArtistLinksLessCPU, createArtistLinksLessMemory} from "../utils/createArtistLinks";
 import {ObjectId} from "mongodb";
+import {setCodeAccessed} from "./writeToDB";
+import throttleQueue from "../utils/throttleQueue";
+import {mbLookup} from "./mbLookup";
 
 export async function getAllGenresFromDB() {
     return await collections.genres?.find({}).toArray() as unknown as Genre[];
+}
+
+export async function getGenresFromIDs(genreIDs: string[]) {
+    return await collections.genres?.find({ id: {$in: genreIDs} }).toArray();
 }
 
 export async function getAllGenreData() {
@@ -93,7 +100,36 @@ export async function getMultipleGenresArtistsData(filter: FilterField, amount: 
 }
 
 export async function getMultipleGenresArtists(filter: FilterField, amount: number, genreIDs: string[]) {
-    return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }}).sort({ [filter]: -1 }).limit(amount).toArray();
+    return await collections.artists?.find({ genres: {$in: genreIDs}, [filter]: { $type: "number" }, }).sort({ [filter]: -1 }).limit(amount).toArray();
+}
+
+export async function getRelatedGenresArtists(artist: Artist, filter: FilterField, amount: number, useSimilar = true) {
+    if (!artist.genres.length) {
+        return;
+    }
+    const genres = await getGenresFromIDs(artist.genres);
+    const artists = await getMultipleGenresArtists(filter, amount, artist.genres) as unknown as Artist[];
+    if (!artists || !artists.length) {
+        return;
+    }
+    const artistIDs = artists.map(artist => artist.id);
+    if (!artistIDs.includes(artist.id)) {
+        artists.push(artist);
+    }
+    if (useSimilar) {
+        const similarArtists = await getSimilarArtistsFromArray(artist.similar);
+        for (const similarArtist of similarArtists) {
+            if (!artistIDs.includes(similarArtist.id) && similarArtist.genres.some(g => artist.genres.includes(g))) {
+                artists.push(similarArtist);
+            }
+        }
+    }
+    return {
+        artists,
+        count: await getArtistCountSum(artist.genres),
+        links: createArtistLinksLessCPU(artists),
+        genres,
+    }
 }
 
 export async function getArtistCountSum(genreIDs: string[]) {
@@ -124,10 +160,14 @@ export async function getGenreNameFromID(genreID: string) {
     return await collections.genres?.findOne({ id: genreID });
 }
 
+export async function getArtistFromID(id: string) {
+    return await collections.artists?.findOne({ id: id });
+}
+
 export async function getSimilarArtistsFromArray(artists: string[]) {
     const similarArtists: Artist[] = [];
     for (const artist of artists) {
-        const similarArtist = await collections.artists?.findOne({name: artist}) as unknown as Artist;
+        const similarArtist = await getArtistByName(artist);
         if (similarArtist) {
             similarArtists.push(similarArtist);
         }
@@ -144,8 +184,30 @@ export async function searchDB(query: string) {
     return [...artistResults, ...genreResults];
 }
 
-export async function getArtistByName(name: string) {
+export async function matchArtistNameInDB(query: string, limit = 10) {
+    const searchQuery = [{ $search: { text: { query, path: "name" }, index: "name" } }, { $limit: limit }];
+    return collections.artists?.aggregate(searchQuery).toArray();
+}
+
+export async function getArtistByExactName(name: string) {
     return await collections.artists?.findOne({ name: name });
+}
+
+// Gets an artist by exact name; failing that tries to find by search (with name match check)
+export async function getArtistByName(name: string) {
+    const exactResult = await getArtistByExactName(name) as unknown as Artist;
+    if (exactResult && exactResult.name) {
+        return exactResult;
+    } else {
+        const result = await matchArtistNameInDB(name, 5);
+        if (result && result.length > 0) {
+            for (const artist of result) {
+                if (artist.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()) {
+                    return artist as unknown as Artist;
+                }
+            }
+        }
+    }
 }
 
 export async function getSimilarArtistsFromArtist(artistId: string) {
@@ -526,12 +588,49 @@ export async function getDuplicateArtists() {
         { $project: { duplicateCount: 0 } }]).toArray();
 }
 
+export async function getDuplicateArtistsNames() {
+    return collections.artists?.aggregate([
+        { $match: { name: { $type: "string" } } }, // optional: skip null/missing
+        {
+            $setWindowFields: {
+                partitionBy: "$name",
+                output: {
+                    duplicateCount: { $count: {} }
+                }
+            }
+        },
+        { $match: { duplicateCount: { $gt: 1 } } },
+
+        // project ONLY id + name
+        {
+            $project: {
+                _id: 0,     // optional but usually desired
+                id: 1,
+                name: 1
+            }
+        }
+    ]).toArray();
+}
+
 export async function getUserData(id: string) {
     return await collections.users?.findOne({ id: id });
 }
 
 export async function getMultipleArtists(artists: string[]){
     const artistData =  await collections.artists?.find({ id: { $in: artists } }).toArray();
+    // For testing: delete
+    // const fetchedIDs = artistData?.map(a => a.id)
+    // for (const artist of artists) {
+    //     if (fetchedIDs && !fetchedIDs.includes(artist)) {
+    //         console.log(artist + " not found in DB, looking up via musicbrainz...")
+    //         const missingData = await throttleQueue.enqueue(() => mbLookup(artist, 'artist'))
+    //         if (missingData) {
+    //             console.log(missingData)
+    //         } else {
+    //             console.log('Not found in MB!')
+    //         }
+    //     }
+    // }
     return {
         artists: artistData,
         links: createArtistLinksLessCPU(artistData as unknown as Artist[]),
@@ -595,4 +694,99 @@ export async function findArtistsByHops(
 
     const results = await collections.artists?.aggregate<(Artist & { hopDistance: number })>(pipeline).toArray();
     return results ?? [];
+}
+
+function buildDecadeCondition(startYear: number, endYear: number) {
+    return {
+        $and: [
+            { $lte: [{ $toInt: { $substr: ["$startDate", 0, 4] } }, endYear] },
+            {
+                $or: [
+                    { $not: { $gt: [{ $strLenCP: { $ifNull: ["$endDate", ""] } }, 3] } },
+                    { $gte: [{ $toInt: { $substr: ["$endDate", 0, 4] } }, startYear] }
+                ]
+            }
+        ]
+    };
+}
+
+export async function getArtistsByDecades(
+    decades: string[],
+    filter: FilterField,
+    amount: number,
+    genreIDs?: string[]
+) {
+    const decadeConditions = decades.map(d => {
+        const startYear = parseInt(d.replace('s', ''));
+        return buildDecadeCondition(startYear, startYear + 9);
+    });
+
+    const matchStage: Record<string, unknown> = {
+        startDate: { $exists: true, $nin: [null, ""] },
+        [filter]: { $type: "number" },
+        $expr: {
+            $and: [
+                { $gt: [{ $strLenCP: "$startDate" }, 3] },
+                decadeConditions.length === 1 ? decadeConditions[0] : { $or: decadeConditions }
+            ]
+        }
+    };
+
+    if (genreIDs?.length) {
+        matchStage.genres = { $in: genreIDs };
+    }
+
+    const artists = await collections.artists
+        ?.find(matchStage)
+        .sort({ [filter]: -1 })
+        .limit(amount)
+        .toArray();
+
+    const countMatch: Record<string, unknown> = {
+        startDate: { $exists: true, $nin: [null, ""] },
+        $expr: {
+            $and: [
+                { $gt: [{ $strLenCP: "$startDate" }, 3] },
+                decadeConditions.length === 1 ? decadeConditions[0] : { $or: decadeConditions }
+            ]
+        }
+    };
+    if (genreIDs?.length) countMatch.genres = { $in: genreIDs };
+
+    const count = await collections.artists?.countDocuments(countMatch);
+
+    return {
+        artists,
+        count,
+        links: createArtistLinksLessCPU(artists as unknown as Artist[]),
+    };
+}
+
+export async function verifyAccessCode(code: string, userEmail: string) {
+    const accessCode = await collections.accessCodes?.findOne({ userEmail: userEmail.toLowerCase() });
+    const isValid = accessCode ? accessCode.code === code || accessCode.accessed : false;
+    if (isValid) {
+        await setCodeAccessed(code, isValid);
+    }
+    return isValid;
+}
+
+export async function getAccessCodes(phase?: string, version?: string, emails?: string[]) {
+    return await collections.accessCodes?.find({ phase, version, userEmail: { $in: emails } }).toArray();
+}
+
+export async function removeAccessCodesByPhase(phase: string) {
+    const result = await collections.accessCodes?.deleteMany({ phase });
+    console.log(result?.deletedCount)
+}
+
+export async function removeAccessCodesByVersion(version: string) {
+    const result = await collections.accessCodes?.deleteMany({ version });
+    console.log(result?.deletedCount)
+}
+
+export async function removeAccessCodesByEmail(emails: string[]) {
+    const lowerEmails = emails.map(email => email.toLowerCase());
+    const result = await collections.accessCodes?.deleteMany({ userEmail: { $in: lowerEmails } });
+    console.log(result?.deletedCount)
 }

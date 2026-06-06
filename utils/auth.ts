@@ -3,8 +3,15 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import {authDB} from "../db/connection";
 import {createUserData, deleteUserData} from "../controllers/writeToDB";
 import {ADMIN_EMAIL} from "./defaults";
-import {sendEmail} from "./email";
-import {FRONTEND_DEPLOYMENT_URL, FRONTEND_LOCALHOST, ngrokUrl, serverUrl} from "./urls";
+import {sendEmail} from "./mailjetEmail";
+import {
+    BETTER_AUTH_PREVIEWS_WILDCARD,
+    FRONTEND_DEPLOYMENT_URL,
+    FRONTEND_LOCALHOST,
+    spotifyServerUrl,
+    serverUrl,
+} from "./urls";
+import {getOAuthState} from "better-auth/api";
 
 export const auth = () => betterAuth({
     database: authDB.db ? mongodbAdapter(authDB.db) : undefined,
@@ -16,13 +23,13 @@ export const auth = () => betterAuth({
             await sendEmail({
                 to: user.email,
                 from: ADMIN_EMAIL,
-                subject: 'Reset your password',
-                text: `Click the link to reset your password: ${url}`
+                subject: 'Reset your Rhizome password',
+                text: `Click the link to reset your password: ${url}. \nIf this wasn't you, you can safely ignore this email.`
             });
         },
-        onPasswordReset: async ({ user }, request) => {
-            console.log(`Password for user ${user.email} has been reset.`);
-        },
+        // onPasswordReset: async ({ user }, request) => {
+        //     console.log(`Password for user ${user.email} has been reset.`);
+        // },
     },
     socialProviders: {
         google: {
@@ -33,10 +40,15 @@ export const auth = () => betterAuth({
         spotify: {
             clientId: process.env.SPOTIFY_CLIENT_ID as string,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
-            redirectURI: `${ngrokUrl}/api/auth/callback/spotify`,
+            redirectURI: `${spotifyServerUrl}/api/auth/callback/spotify`,
         },
     },
     user: {
+        additionalFields: {
+            appAccess: {
+                type: "string",
+            }
+        },
         changeEmail: {
             enabled: true,
         },
@@ -55,21 +67,33 @@ export const auth = () => betterAuth({
                     from: ADMIN_EMAIL,
                     subject: 'Confirm your Rhizome account deletion',
                     text: `Click the link to permanently delete your account (no going back!): ${url}`
-                })
+                });
             },
             afterDelete: async (user, request) => {
                 await deleteUserData(user.id);
             }
         }
     },
-    trustedOrigins: [FRONTEND_LOCALHOST, FRONTEND_DEPLOYMENT_URL],
+    trustedOrigins: [FRONTEND_LOCALHOST, FRONTEND_DEPLOYMENT_URL, BETTER_AUTH_PREVIEWS_WILDCARD],
     databaseHooks: {
         user: {
             create: {
+                before: async (user, ctx) => {
+                    if (!!(ctx && ctx.params && ctx.params.id)) {
+                        const additionalData = await getOAuthState();
+                        if (additionalData?.appAccess) {
+                            return {
+                                data: {
+                                    appAccess: additionalData.appAccess
+                                }
+                            }
+                        }
+                    }
+                },
                 after: async (user, ctx) => {
                     const isSocial = !!(ctx && ctx.params && ctx.params.id);
                     //console.log(`trying to create ${JSON.stringify(user, null, 4)} with context ${JSON.stringify(ctx, null, 4)}`);
-                    console.log(`creating user...`)
+                    //console.log(`creating user...`)
                     await createUserData(user.id, isSocial);
                 }
             },
