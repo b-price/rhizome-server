@@ -59,7 +59,7 @@ export async function lastFMUserPreview(lfmUsername: string, artistCount = 5) {
     const artistNames: string[] = [];
     let totalArtists = 0;
     if (rawArtists && rawArtists.artists.length) {
-        for (let i = 0; i < Math.min(rawArtists.artists.length, artistCount); i++) {
+        for (let i = 0; i < Math.max(rawArtists.artists.length, artistCount); i++) {
             const artistName = rawArtists.artists[i].name;
             if (artistName !== undefined) {
                 artistNames.push(artistName);
@@ -71,19 +71,9 @@ export async function lastFMUserPreview(lfmUsername: string, artistCount = 5) {
 }
 
 export async function fetchRecentLastFMUserArtists(lfmUsername: string, since: number) {
-    try {
-        const now = Math.floor(new Date().getTime() / 1000);
-        const response = await axios.get(`${BASE_URL_WEEKLY}${lfmUsername}&api_key=${process.env.LASTFM_API_KEY}&format=json&from=${since}&to=${now}`);
-        const artist = response.data.weeklyartistchart.artist;
-        if (!artist) return [];
-        if (Array.isArray(artist)) {
-            return artist.map((a: { mbid: string; name: string; playcount: string; }) => {
-                return { id: a.mbid, name: a.name, playcount: parseInt(a.playcount), date: new Date, lastFM: true };
-            });
-        }
-        return [{ id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true }];
-    } catch (error) {
-        console.error('Error retrieving recent user artists: ', error);
-        return [];
-    }
+    const now = Math.floor(new Date().getTime() / 1000);
+    const response = await axios.get(`${BASE_URL_WEEKLY}${lfmUsername}${URL_CONFIG}&from=${since}&to=${now}`);
+    return response.data.weeklyartistchart.artist.map((artist: { mbid: string; name: string; playcount: string; }) => {
+        return { id: artist.mbid, name: artist.name, playcount: parseInt(artist.playcount), date: new Date, lastFM: true };
+    });
 }

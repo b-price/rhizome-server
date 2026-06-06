@@ -12,9 +12,11 @@ import {
     getParentOnlyArtists,
     getRelatedGenresArtists,
     getSimilarArtistsFromArtist,
-    getTopArtists, matchArtistNameInDB
+    getTopArtists, matchArtistNameInDB,
+    findArtistsByHops
 } from "../controllers/getFromDB";
 import {flipBadDataArtist, submitBadDataReport, updateArtistTopTracks} from "../controllers/writeToDB";
+import {createArtistLinksLessCPU} from "../utils/createArtistLinks";
 import { memoryUsage } from "node:process"
 import {ParentField, LinkType, FilterField} from "../types";
 import {topTrackArtists, topTracksArtist} from "../controllers/lastFMTopTracks";
@@ -297,6 +299,21 @@ router.put('/bdflag/:id/:reason', async (req, res) => {
     } catch (err) {
         console.error('Failed to update bad data flag:', err);
         res.status(500).json({ error: 'Failed to update bad data flag' });
+    }
+});
+
+router.post('/hops', async (req, res) => {
+    try {
+        const { artistIds, hopDepth, limit, genres } = req.body;
+        if (!artistIds?.length || !hopDepth || hopDepth < 1) {
+            throw new Error('Invalid parameters');
+        }
+        const hopArtists = await findArtistsByHops(artistIds, hopDepth, limit ?? 300, genres);
+        const links = createArtistLinksLessCPU(hopArtists as any);
+        res.json({ artists: hopArtists, links });
+    } catch (err) {
+        console.error('Failed to fetch hop artists:', err);
+        res.status(500).json({ error: 'Failed to fetch hop artists' });
     }
 });
 
