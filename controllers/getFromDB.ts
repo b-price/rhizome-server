@@ -175,13 +175,33 @@ export async function getSimilarArtistsFromArray(artists: string[]) {
     return similarArtists;
 }
 
-export async function searchDB(query: string) {
-    const searchQuery = { $text: { $search: query } };
-    let genreResults = await collections.genres?.find(searchQuery).limit(10).toArray();
-    let artistResults = await collections.artists?.find(searchQuery).limit(10).toArray();
-    if (!genreResults) genreResults = [];
-    if (!artistResults) artistResults = [];
-    return [...artistResults, ...genreResults];
+export async function searchDB(query: string, limit = 10) {
+    // Prefix matching while typing (autocomplete) plus whole-word typo tolerance (text + fuzzy),
+    // with exact names boosted to the top
+    const searchPipeline = (index: string) => [
+        {
+            $search: {
+                index,
+                compound: {
+                    should: [
+                        { autocomplete: { query, path: "name", score: { boost: { value: 3 } } } },
+                        { autocomplete: { query, path: "name", fuzzy: { maxEdits: 1, prefixLength: 1 } } },
+                        { text: { query, path: "name", fuzzy: { maxEdits: 1, prefixLength: 1 }, score: { boost: { value: 2 } } } },
+                        { phrase: { query, path: "name", score: { boost: { value: 5 } } } },
+                    ],
+                    minimumShouldMatch: 1,
+                },
+            },
+        },
+        { $limit: limit },
+        { $addFields: { searchScore: { $meta: "searchScore" } } },
+    ];
+    const [artistResults, genreResults] = await Promise.all([
+        collections.artists?.aggregate(searchPipeline("name")).toArray(),
+        collections.genres?.aggregate(searchPipeline("genreName")).toArray(),
+    ]);
+    return [...(artistResults ?? []), ...(genreResults ?? [])]
+        .sort((a, b) => (b.searchScore ?? 0) - (a.searchScore ?? 0));
 }
 
 export async function matchArtistNameInDB(query: string, limit = 10) {
