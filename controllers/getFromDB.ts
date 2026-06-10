@@ -204,6 +204,13 @@ export async function searchDB(query: string, limit = 10) {
         .sort((a, b) => (b.searchScore ?? 0) - (a.searchScore ?? 0));
 }
 
+// Returns one random artist or genre (even odds) for the "Surprise Me" action
+export async function getRandomNode() {
+    const collection = Math.random() < 0.5 ? collections.artists : collections.genres;
+    const result = await collection?.aggregate([{ $sample: { size: 1 } }]).toArray();
+    return result?.[0] ?? null;
+}
+
 export async function matchArtistNameInDB(query: string, limit = 10) {
     const searchQuery = [{ $search: { text: { query, path: "name" }, index: "name" } }, { $limit: limit }];
     return collections.artists?.aggregate(searchQuery).toArray();
