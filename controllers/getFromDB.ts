@@ -637,71 +637,75 @@ export async function getMultipleArtists(artists: string[]){
     }
 }
 
-/**
- * Find artists within N degrees (via `similar`) of any of the given seed artist IDs.
- * Returns full artist documents, deduped across all seeds, sorted by degree then name.
- *
- * @param seedIds list of starting artist `id`s (not `_id`)
- * @param degrees maximum degrees of separation (1 = direct similar only)
- * @param limit max number of docs to return
- */
-export async function findArtistsWithinDegrees(
+export async function getArtistsAndLinksByHops(
     seedIds: string[],
-    degrees: number,
-    limit: number
+    hops: number,
+    limit: number,
+    genreFilter?: string[]
 ) {
-    if (!seedIds?.length || degrees < 1 || limit < 1) return [];
+    const originalArtists = await collections.artists?.find({ id: { $in: seedIds } }).toArray();
+    const hopArtists = await findArtistsByHops(seedIds, hops, limit, genreFilter);
+    const links = createArtistLinksLessCPU([...hopArtists, ...originalArtists ?? []] as any);
+    return { hopArtists, links };
+}
 
-    const pipeline = [
-        // Start from the seed artists by 'id'
-        { $match: { id: { $in: seedIds } } },
+/**
+ * Find artists within N hops (via `similar` name graph) of any given seed artist IDs.
+ * Returns full artist documents, deduped across all seeds, sorted by hopDistance then name.
+ * hopDistance 1 = directly similar, 2 = similar to similar, etc.
+ *
+ * @param seedIds list of starting artist `id`s
+ * @param hops maximum hops (1 = direct similar only, 2 = two hops out, etc.)
+ * @param limit max number of docs to return
+ * @param genreFilter if provided, only return artists whose genres overlap this list
+ */
+export async function findArtistsByHops(
+    seedIds: string[],
+    hops: number,
+    limit: number,
+    genreFilter?: string[]
+) {
+    if (!seedIds?.length || hops < 1 || limit < 1) return [];
 
-        // Traverse the "similar" graph up to `degrees` hops:
-        //   startWith = the immediate neighbors' ids
-        //   connectFromField = follow each found doc's similar.id
-        //   connectToField = match to a doc's id
-        {
-            $graphLookup: {
-                from: "Artists",
-                startWith: "$similar.id",
-                connectFromField: "similar.id",
-                connectToField: "id",
-                as: "reached",
-                maxDepth: degrees - 1,     // depth 0 => 1 hop; so degrees => degrees-1
-                depthField: "degree"       // 0 = one hop away, 1 = two hops away, etc.
-            }
-        },
+    const results: (Artist & { hopDistance: number })[] = [];
+    const seenIds = new Set(seedIds);
 
-        // We only need the reached vertices
-        { $project: { reached: 1 } },
-        { $unwind: "$reached" },
+    // Iterative hop expansion: union similar-name sets, then look up matching artists.
+    // Avoids $graphLookup from a large seed set which creates enormous intermediate results.
+    // Each hop gets its own limit so a large seed set saturating hop 1 doesn't prevent hop 2+.
+    let currentIds = seedIds;
 
-        // Exclude the seeds (in case of cycles)
-        { $match: { "reached.id": { $nin: seedIds } } },
+    for (let hop = 1; hop <= hops; hop++) {
+        // Collect all similar-name strings from the current frontier
+        const nameRows = await collections.artists
+            ?.find({ id: { $in: currentIds } }, { projection: { similar: 1 } })
+            .toArray() ?? [];
 
-        // When multiple seeds reach the same artist (or via multiple paths),
-        // keep a single copy and the minimum degree.
-        {
-            $group: {
-                _id: "$reached.id",
-                doc: { $first: "$reached" },
-                degree: { $min: "$reached.degree" }
-            }
-        },
+        const candidateNames = [...new Set(nameRows.flatMap(r => (r as any).similar ?? []))];
+        if (!candidateNames.length) break;
 
-        // Degree 0 means 1 hop away, degree 1 means 2 hops, etc.
-        { $sort: { degree: 1, "doc.name": 1 } },
-        { $limit: limit },
+        // Find artists whose name is in the candidate set and not already seen
+        const matchPipeline: object[] = [
+            { $match: { name: { $in: candidateNames }, id: { $nin: [...seenIds] } } },
+            ...(genreFilter?.length ? [{ $match: { genres: { $in: genreFilter } } }] : []),
+            { $limit: limit },
+        ];
 
-        // Attach the degree to the document for convenience
-        {
-            $replaceWith: {
-                $mergeObjects: ["$doc", { degree: "$degree" }]
+        const hopArtists = await collections.artists
+            ?.aggregate<Artist>(matchPipeline)
+            .toArray() ?? [];
+
+        for (const artist of hopArtists) {
+            if (!seenIds.has(artist.id)) {
+                results.push({ ...artist, hopDistance: hop });
+                seenIds.add(artist.id);
             }
         }
-    ];
 
-    const results = await collections.artists?.aggregate<(Artist & { degree: number })>(pipeline).toArray();
+        currentIds = hopArtists.map(a => a.id);
+        if (!currentIds.length) break;
+    }
+
     return results;
 }
 
