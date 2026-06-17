@@ -175,13 +175,40 @@ export async function getSimilarArtistsFromArray(artists: string[]) {
     return similarArtists;
 }
 
-export async function searchDB(query: string) {
-    const searchQuery = { $text: { $search: query } };
-    let genreResults = await collections.genres?.find(searchQuery).limit(10).toArray();
-    let artistResults = await collections.artists?.find(searchQuery).limit(10).toArray();
-    if (!genreResults) genreResults = [];
-    if (!artistResults) artistResults = [];
-    return [...artistResults, ...genreResults];
+export async function searchDB(query: string, limit = 10) {
+    // Prefix matching while typing (autocomplete) plus whole-word typo tolerance (text + fuzzy),
+    // with exact names boosted to the top
+    const searchPipeline = (index: string) => [
+        {
+            $search: {
+                index,
+                compound: {
+                    should: [
+                        { autocomplete: { query, path: "name", score: { boost: { value: 3 } } } },
+                        { autocomplete: { query, path: "name", fuzzy: { maxEdits: 1, prefixLength: 1 } } },
+                        { text: { query, path: "name", fuzzy: { maxEdits: 1, prefixLength: 1 }, score: { boost: { value: 2 } } } },
+                        { phrase: { query, path: "name", score: { boost: { value: 5 } } } },
+                    ],
+                    minimumShouldMatch: 1,
+                },
+            },
+        },
+        { $limit: limit },
+        { $addFields: { searchScore: { $meta: "searchScore" } } },
+    ];
+    const [artistResults, genreResults] = await Promise.all([
+        collections.artists?.aggregate(searchPipeline("name")).toArray(),
+        collections.genres?.aggregate(searchPipeline("genreName")).toArray(),
+    ]);
+    return [...(artistResults ?? []), ...(genreResults ?? [])]
+        .sort((a, b) => (b.searchScore ?? 0) - (a.searchScore ?? 0));
+}
+
+// Returns one random artist or genre (even odds) for the "Surprise Me" action
+export async function getRandomNode() {
+    const collection = Math.random() < 0.5 ? collections.artists : collections.genres;
+    const result = await collection?.aggregate([{ $sample: { size: 1 } }]).toArray();
+    return result?.[0] ?? null;
 }
 
 export async function matchArtistNameInDB(query: string, limit = 10) {
