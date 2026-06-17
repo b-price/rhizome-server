@@ -637,6 +637,18 @@ export async function getMultipleArtists(artists: string[]){
     }
 }
 
+export async function getArtistsAndLinksByHops(
+    seedIds: string[],
+    hops: number,
+    limit: number,
+    genreFilter?: string[]
+) {
+    const originalArtists = await collections.artists?.find({ id: { $in: seedIds } }).toArray();
+    const hopArtists = await findArtistsByHops(seedIds, hops, limit, genreFilter);
+    const links = createArtistLinksLessCPU([...hopArtists, ...originalArtists ?? []] as any);
+    return { hopArtists, links };
+}
+
 /**
  * Find artists within N hops (via `similar` name graph) of any given seed artist IDs.
  * Returns full artist documents, deduped across all seeds, sorted by hopDistance then name.
